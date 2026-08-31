@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas - Ember &amp; Graphite (v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#ececec">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#ececec"/>
+    <rect x="20" y="20" width="160" height="160" fill="#000000" rx="20"/>
+    <circle cx="100" cy="60" r="15" fill="#e85002"/>
+    <rect x="30" y="90" width="140" height="15" fill="#f9f9f9" rx="4"/>
+    <rect x="30" y="115" width="140" height="15" fill="#f9f9f9" rx="4"/>
+    <rect x="30" y="140" width="100" height="15" fill="#f9f9f9" rx="4"/>
+  </svg>
+</template>
+<style>
+  :root{
+    --bg:#e9eaee;
+    --bezel:#1b1c1f;
+    --bezel-2:#0d0d0f;
+    --panel:#f6f7f9;
+    --card:#ffffff;
+    --ink:#14151a;
+    --ink-soft:#6b6e76;
+    --ink-faint:#a4a7b0;
+    --line:#e6e7eb;
+    --line-strong:#dcdde3;
+    --accent:#121317;
+    --blue:#4a5df0;
+    --blue-soft:#e2e6fd;
+    --coral:#ff6a5c;
+    --coral-soft:#ffe1dd;
+    --gold:#f2a93b;
+    --gold-soft:#fdecd0;
+    --green:#1fae72;
+    --green-soft:#dbf5e8;
+    --r-lg:22px;
+    --r-md:16px;
+    --shadow-card:0 1px 1px rgba(20,21,26,.03), 0 6px 14px -8px rgba(20,21,26,.08), 0 24px 48px -24px rgba(20,21,26,.16);
+    --shadow-card-hover:0 4px 10px rgba(20,21,26,.06), 0 20px 40px -12px rgba(20,21,26,.16);
+  }
+  [data-theme="dark"]{
+    --bg:#141417;
+    --panel:#101013;
+    --card:#1a1a1e;
+    --ink:#f4f4f6;
+    --ink-soft:#9a9ba3;
+    --ink-faint:#6a6b72;
+    --line:#28282d;
+    --line-strong:#323238;
+    --accent:#f4f4f6;
+    --blue-soft:#242a52;
+    --coral-soft:#3a2422;
+    --gold-soft:#3a2f1a;
+    --green-soft:#173428;
+    --shadow-card:0 1px 1px rgba(0,0,0,.4), 0 6px 14px -8px rgba(0,0,0,.5), 0 24px 48px -24px rgba(0,0,0,.7);
+    --shadow-card-hover:0 4px 10px rgba(0,0,0,.4), 0 20px 40px -12px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Open Sans',-apple-system,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, #f3f4f7 0%, transparent 60%),
+      radial-gradient(1000px 500px at 90% 110%, #eceef3 0%, transparent 55%),
+      var(--bg);
+    min-height:100vh;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .screen{
+    background:var(--panel);
+    min-height:100vh;
+  }
+
+  .url-bar{
+    flex:1;
+    display:flex; align-items:center; gap:8px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 16px;
+    color:var(--ink-soft);
+    font-size:13px;
+    max-width:460px;
+    margin:0 auto;
+  }
+  .url-bar svg{width:13px; height:13px; opacity:.5; flex:none;}
+  .url-bar input{
+    flex:1; min-width:0; appearance:none; border:none; background:transparent; outline:none;
+    font-family:inherit; font-size:13px; color:var(--ink);
+  }
+  .url-bar input::placeholder{ color:var(--ink-soft); }
+  .url-bar:focus-within{ border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+
+  /* ===== App shell ===== */
+  .app{
+    display:flex;
+    min-height:760px;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width:64px;
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:22px 0;
+    gap:6px;
+    border-right:1px solid var(--line);
+    background:var(--panel);
+  }
+  .side-btn{
+    width:38px; height:38px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+    position:relative;
+  }
+  .side-btn svg{width:18px; height:18px;}
+  .side-btn:hover{background:var(--line); color:var(--ink);}
+  .side-btn.active{background:var(--accent); color:var(--panel);}
+  .side-gap{flex:1;}
+  .side-btn[aria-pressed="true"]{ background:var(--accent); color:var(--panel); }
+  .side-dot{
+    position:absolute; top:5px; right:5px;
+    width:7px; height:7px; border-radius:50%;
+    background:var(--coral);
+    border:1.5px solid var(--panel);
+  }
+
+  /* Main content */
+  .main{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    background:var(--panel);
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    padding:20px 32px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{
+    display:flex; align-items:center; gap:9px;
+    font-family:'Montserrat', sans-serif; font-weight:800; font-size:17px; letter-spacing:-.02em;
+    color:var(--ink);
+    flex:none;
+  }
+  .brand-mark{
+    width:26px; height:26px; border-radius:8px;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-mark svg{width:15px; height:15px; color:var(--panel);}
+
+  .pillnav{
+    display:flex; gap:4px;
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:4px;
+    border-radius:999px;
+    flex:none;
+  }
+  .pillnav button{
+    appearance:none; border:none; background:transparent;
+    font-family:'Montserrat', sans-serif; font-size:13.5px; font-weight:600;
+    color:var(--ink-soft);
+    padding:9px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .18s ease, color .18s ease;
+    white-space:nowrap;
+  }
+  .pillnav button.active{background:var(--accent); color:var(--panel);}
+  .pillnav button:not(.active):hover{color:var(--ink);}
+
+  .top-right{
+    margin-left:auto;
+    display:flex; align-items:center; gap:10px;
+    flex:none;
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:11px;
+    background:var(--card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+    cursor:pointer;
+    position:relative;
+  }
+  .icon-btn svg{width:15px; height:15px;}
+  .avatar-ring{
+    width:36px; height:36px; border-radius:50%;
+    overflow:hidden; border:2px solid var(--card);
+    box-shadow:0 0 0 1px var(--line);
+    flex:none;
+  }
+  .avatar-ring img{width:100%; height:100%; object-fit:cover; display:block;}
+  .profile-btn{ display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink-soft); }
+
+  .view{ padding:30px 32px 40px; display:none; }
+  .view.active{ display:block; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    * {transition:none !important; animation:none !important;}
+  }
+
+  /* ===== shared card look ===== */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-card);
+  }
+  .card.accent-dark{
+    background:var(--bezel);
+    border-color:var(--line-strong);
+    color:var(--panel);
+  }
+  .card.accent-dark h3, .card.accent-dark h4, .card.accent-dark h5 { color:var(--panel); }
+  .card.accent-dark .panel-head h3 { color:var(--panel); }
+  [data-theme="dark"] .card.accent-dark{
+    background:var(--panel);
+    border-color:var(--line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .card.accent-dark h3, [data-theme="dark"] .card.accent-dark h4, [data-theme="dark"] .card.accent-dark h5 { color:var(--ink); }
+
+  /* ============ JOURNEY VIEW ============ */
+  .j-head{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    margin-bottom:26px; gap:20px; flex-wrap:wrap;
+  }
+  .j-head h1{ font-family:'Montserrat', sans-serif; font-size:32px; font-weight:700; letter-spacing:-.02em; }
+  .j-head p{ color:var(--ink-soft); font-size:14.5px; margin-top:6px; max-width:440px; line-height:1.5; }
+
+  .avatar-stack{ display:flex; align-items:center; }
+  .avatar-stack .a{
+    width:42px; height:42px; border-radius:50%;
+    border:3px solid var(--panel);
+    margin-left:-12px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .avatar-stack .a:first-child{margin-left:0;}
+  .avatar-stack .a img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar-stack .badge{
+    position:absolute; bottom:-2px; right:-2px;
+    min-width:16px; height:16px; padding:0 3px;
+    border-radius:999px; font-size:9.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; border:2px solid var(--panel);
+  }
+  .avatar-stack .a.more{
+    background:var(--card); border:3px solid var(--panel);
+    box-shadow:0 0 0 1px var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11.5px; font-weight:700; color:var(--ink-soft);
+  }
+
+  .board-toolbar{ display:flex; gap:8px; margin-left:22px; }
+  .board-toolbar .icon-btn{ width:34px; height:34px; }
+
+  /* board */
+  .j-board{
+    display:grid;
+    grid-template-columns: 250px 300px 300px 220px;
+    gap:22px;
+    align-items:start;
+  }
+  .col-label{ font-size:13px; color:var(--ink-soft); font-weight:600; margin-top:12px; text-align:center; }
+
+  .stack{
+    display:flex; flex-direction:column;
+    border-radius:var(--r-lg);
+    overflow:hidden;
+  }
+  .stack .task{
+    background:var(--card); border:1px solid var(--line);
+    padding:18px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .stack .task + .task{ border-top:1px solid var(--line); }
+  .stack .task:first-child{ border-radius:var(--r-lg) var(--r-lg) 0 0; }
+  .stack .task:last-child{ border-radius:0 0 var(--r-lg) var(--r-lg); }
+  .task-top{ display:flex; align-items:center; justify-content:space-between; }
+  .p-avatar{ width:40px; height:40px; border-radius:50%; overflow:hidden; box-shadow:0 0 0 1px var(--line); }
+  .p-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .task-actions{ display:flex; gap:8px; }
+  .mini-btn{
+    width:28px; height:28px; border-radius:9px;
+    background:var(--panel); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+  }
+  .mini-btn.done{ background:var(--green-soft); color:var(--green); border-color:transparent; }
+  .mini-btn svg{ width:13px; height:13px; }
+  .task-label{ font-size:13.5px; font-weight:500; color:var(--ink); line-height:1.4; }
+
+  .list-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:6px;
+  }
+  .row{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 12px;
+    border-radius:14px;
+  }
+  .row:hover{ background:var(--panel); }
+  .row .p-avatar{ width:34px; height:34px; flex:none; }
+  .row .plus{
+    width:34px; height:34px; border-radius:50%; flex:none;
+    border:1.5px dashed var(--line-strong);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+  }
+  .row .plus svg{ width:13px; height:13px; }
+  .row-label{ font-size:13.5px; font-weight:500; flex:1; line-height:1.35; color:var(--ink); }
+  .row .task-actions{ margin-left:auto; }
+  .row .more{
+    width:26px; height:26px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+  }
+
+  /* destination block */
+  .dest-wrap{ display:flex; flex-direction:column; gap:14px; }
+  .dest-hero{
+    background:var(--accent);
+    color:var(--panel);
+    border-radius:var(--r-lg);
+    padding:22px 18px;
+    font-weight:700; font-size:15px; line-height:1.35;
+    display:flex; align-items:center;
+    min-height:88px;
+    box-shadow:var(--shadow-card);
+  }
+  .next-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .next-grid .card{
+    padding:16px 14px;
+    font-size:12.5px; font-weight:600;
+    color:var(--ink);
+    min-height:64px;
+    display:flex; align-items:flex-end;
+    line-height:1.3;
+    cursor:default;
+    transition:box-shadow .15s ease;
+  }
+  .next-grid .card:hover{ box-shadow:var(--shadow-card-hover); }
+
+  /* ===== bottom split ===== */
+  .split{
+    display:grid; grid-template-columns:1.4fr 1fr; gap:22px;
+    margin-top:34px;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 4px;
+  }
+  .panel-head h3{ font-family:'Montserrat', sans-serif; font-size:17px; font-weight:700; letter-spacing:-.01em; }
+  .panel-tools{ display:flex; gap:8px; }
+  .panel-tools .icon-btn{ width:30px; height:30px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-size:11.5px; font-weight:600; color:var(--ink-soft);
+    padding:10px 20px; border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:14px 20px; font-size:13px; border-bottom:1px solid var(--line);
+    color:inherit;
+  }
+  .card.accent-dark th{ color:rgba(244,244,246,.62); border-bottom-color:#32333a; }
+  .card.accent-dark td{ border-bottom-color:#2a2b30; }
+  [data-theme="dark"] .card.accent-dark th{ color:var(--ink-soft); border-bottom-color:var(--line); }
+  [data-theme="dark"] .card.accent-dark td{ border-bottom-color:var(--line); }
+  .table-scroll{ overflow-x:auto; }
+  tr:last-child td{ border-bottom:none; }
+  .status-pill{
+    display:inline-flex; align-items:center; padding:4px 10px;
+    border-radius:999px; font-size:11.5px; font-weight:700;
+  }
+  .status-pill.live{ background:var(--green-soft); color:var(--green); }
+  .status-pill.draft{ background:var(--gold-soft); color:#8a5a06; }
+  [data-theme="dark"] .status-pill.draft{ color:var(--gold); }
+  .row-user{ display:flex; align-items:center; gap:8px; }
+  .row-user img{ width:22px; height:22px; border-radius:50%; object-fit:cover; }
+
+  .mini-timeline{ padding:6px 20px 20px; display:flex; flex-direction:column; gap:16px; }
+  .tl-item{ display:flex; gap:12px; align-items:flex-start; }
+  .tl-dot{ width:9px; height:9px; border-radius:50%; background:var(--blue); margin-top:6px; flex:none; }
+  .tl-item.done .tl-dot{ background:var(--green); }
+  .tl-body b{ font-size:13.5px; font-weight:600; display:block; }
+  .tl-body span{ font-size:12.5px; color:var(--ink-soft); }
+  .card.accent-dark .tl-body span{ color:rgba(244,244,246,.62); }
+  [data-theme="dark"] .card.accent-dark .tl-body span{ color:var(--ink-soft); }
+
+  /* ============ HOME VIEW ============ */
+  .home-grid{ display:grid; grid-template-columns: 1.1fr 1.5fr; gap:22px; }
+  .ring-card{ padding:26px; display:flex; align-items:center; gap:22px; }
+  .ring{ width:96px; height:96px; flex:none; }
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+  .stat-row .card{ padding:16px 18px; }
+  .stat-num{ font-family:'Montserrat', sans-serif; font-size:24px; font-weight:700; letter-spacing:-.02em; }
+  .stat-lbl{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  .stepper{ display:flex; align-items:center; margin-top:22px; padding:22px 26px; }
+  .step{ display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; position:relative; }
+  .step-dot{ width:30px; height:30px; border-radius:50%; background:var(--panel); border:2px solid var(--line-strong); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--ink-faint); z-index:1; }
+  .step.done .step-dot{ background:var(--accent); border-color:var(--accent); color:var(--panel); }
+  .step.now .step-dot{ background:var(--card); border-color:var(--blue); color:var(--blue); box-shadow:0 0 0 4px var(--blue-soft); }
+  .step-lbl{ font-size:11.5px; font-weight:600; color:var(--ink-soft); text-align:center; }
+  .step.done .step-lbl, .step.now .step-lbl{ color:var(--ink); }
+  .step-line{ position:absolute; top:15px; left:-50%; width:100%; height:2px; background:var(--line-strong); z-index:0; }
+  .step.done .step-line, .step.now .step-line{ background:var(--accent); }
+  .step:first-child .step-line{ display:none; }
+  .step.locked .step-dot{ color:var(--ink-soft); }
+  .step.locked .step-dot svg{ width:12px; height:12px; }
+  .step.locked .step-lbl{ color:var(--ink-soft); }
+
+  .stage-rail{ padding:16px 24px; margin-bottom:22px; }
+  .card.accent-dark .step-lbl{ color:rgba(244,244,246,.62); }
+  .card.accent-dark .step.done .step-lbl, .card.accent-dark .step.now .step-lbl{ color:#f4f4f6; }
+  .card.accent-dark .step-dot{ background:#2a2b30; border-color:#3a3b42; color:rgba(244,244,246,.55); }
+  .card.accent-dark .step.done .step-dot{ background:#f4f4f6; border-color:#f4f4f6; color:#14151a; }
+  .card.accent-dark .step.now .step-dot{ background:#1b1c1f; border-color:var(--blue); color:#8f9dff; }
+  .card.accent-dark .step-line{ background:#3a3b42; }
+  .card.accent-dark .step.done .step-line, .card.accent-dark .step.now .step-line{ background:#f4f4f6; }
+  .stage-rail .stepper{ margin-top:0; padding:0; }
+
+  .tasklist{ padding:6px; }
+  .home-side{ display:flex; flex-direction:column; gap:22px; }
+
+  .shortlist-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:16px 20px 20px; }
+  .shortlist-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--r-md); padding:16px; }
+  .shortlist-card h5{ font-family:'Montserrat', sans-serif; font-size:14.5px; font-weight:700; margin-top:10px; }
+  .shortlist-card p{ font-size:12px; color:var(--ink-soft); margin-top:3px; }
+  .match-pill{ display:inline-flex; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; }
+  .match-high{ background:var(--green-soft); color:var(--green); }
+  .match-mid{ background:var(--gold-soft); color:var(--gold); }
+
+  /* ============ SERVICES VIEW ============ */
+  .trust-ribbon{
+    display:flex; align-items:center; gap:10px;
+    background:var(--green-soft); color:var(--green);
+    border-radius:var(--r-md);
+    padding:13px 18px; font-size:13px; font-weight:600;
+    margin-bottom:18px;
+  }
+  .trust-ribbon svg{ width:17px; height:17px; flex:none; }
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .chip{
+    appearance:none; border:1px solid var(--line); background:var(--card);
+    font-family:inherit; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    padding:8px 15px; border-radius:999px; cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .chip:hover{ color:var(--ink); }
+  .chip.active{ background:var(--accent); color:var(--panel); border-color:var(--accent); }
+  .svc-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .svc-card.hide{ display:none; }
+  .svc-card{ padding:22px; display:flex; flex-direction:column; gap:14px; transition:box-shadow .15s ease; }
+  .svc-card:hover{ box-shadow:var(--shadow-card-hover); }
+  .svc-icon{ width:42px; height:42px; border-radius:12px; background:var(--panel); display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .svc-icon svg{ width:20px; height:20px; }
+  .svc-card h4{ font-family:'Montserrat', sans-serif; font-size:16px; font-weight:700; }
+  .svc-card p{ font-size:13px; color:var(--ink-soft); line-height:1.5; }
+  .svc-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:8px; }
+  .svc-tag{ font-size:11.5px; font-weight:600; color:var(--green); background:var(--green-soft); padding:4px 9px; border-radius:999px; }
+  .svc-link{ font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:5px; }
+  .svc-link svg{ width:12px; height:12px; }
+
+  /* ============ COMMUNITY VIEW ============ */
+  .comm-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .comm-col h3{ font-family:'Montserrat', sans-serif; font-size:14.5px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .comm-col h3 .dot{ width:7px; height:7px; border-radius:50%; }
+  .comm-view-all{ margin-left:auto; font-size:12px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+  .comm-view-all:hover{ color:var(--ink); }
+  .comm-card{ padding:18px; margin-bottom:14px; }
+  .comm-card .eyebrow{ font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .comm-card h5{ font-family:'Montserrat', sans-serif; font-size:14.5px; font-weight:700; margin:6px 0 6px; line-height:1.35; }
+  .comm-card p{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
+
+  @media (max-width: 1180px){
+    .j-board{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .split, .home-grid{ grid-template-columns:1fr; }
+    .svc-grid, .comm-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 900px){
+    .topbar{ flex-wrap:wrap; gap:14px; padding:16px 20px; }
+    .pillnav{ order:3; width:100%; overflow-x:auto; justify-content:flex-start; }
+    .top-right{ margin-left:auto; }
+    .view{ padding:22px 20px 36px; }
+    .j-board, .svc-grid, .comm-grid, .shortlist-grid{ grid-template-columns:1fr; }
+    .j-head h1{ font-size:26px; }
+    .stepper{ overflow-x:auto; }
+    .step{ min-width:96px; }
+  }
+  @media (max-width: 620px){
+    .sidebar{
+      width:100%; flex-direction:row; padding:10px 14px; gap:4px;
+      border-right:none; border-bottom:1px solid var(--line);
+    }
+    .app{ flex-direction:column; min-height:0; }
+    .side-gap{ flex:1; }
+    .ring-card{ flex-direction:column; align-items:flex-start; gap:16px; }
+    .stat-row{ grid-template-columns:1fr; }
+    .j-head{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ===== boot loader ===== */
+  #loader{
+    position:fixed; inset:0; z-index:999;
+    background:var(--panel);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #loader .loader-mark{
+    width:60px; height:60px; border-radius:17px;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 24px 60px -16px rgba(18,19,23,.5);
+  }
+  #loader .loader-mark svg{ width:32px; height:32px; color:var(--panel); }
+  #loader .loader-bar{
+    position:absolute; bottom:38%; left:50%; transform:translateX(-50%);
+    width:120px; height:2px; border-radius:2px; background:var(--line);
+    overflow:hidden;
+  }
+  #loader .loader-bar i{ display:block; width:40%; height:100%; background:var(--accent); border-radius:2px; }
+
+  /* ===== cursor spotlight ===== */
+  .spotlight{ position:fixed; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity .5s ease; mix-blend-mode:multiply; }
+  [data-theme="dark"] .spotlight{ mix-blend-mode:screen; }
+  .spotlight.on{ opacity:1; }
+  .spotlight-glow{
+    position:absolute; top:0; left:0; width:620px; height:620px;
+    margin:-310px 0 0 -310px; border-radius:50%;
+    background:radial-gradient(circle, rgba(74,93,240,.13), transparent 70%);
+    will-change:transform;
+  }
+  [data-theme="dark"] .spotlight-glow{ background:radial-gradient(circle, rgba(120,140,255,.16), transparent 70%); }
+  .app, .topbar, .view{ position:relative; z-index:2; }
+  .screen{ position:relative; z-index:0; }
+
+  /* ===== 3D tilt ===== */
+  .tilt{ transform-style:preserve-3d; will-change:transform; }
+
+  /* ===== pulsing "now" stage ===== */
+  .step.now .step-dot{ animation:pulseRing 2.2s ease-out infinite; }
+  @keyframes pulseRing{
+    0%{ box-shadow:0 0 0 0 rgba(74,93,240,.35); }
+    70%{ box-shadow:0 0 0 11px rgba(74,93,240,0); }
+    100%{ box-shadow:0 0 0 0 rgba(74,93,240,0); }
+  }
+
+  /* ===== theme swap transition ===== */
+  html.theme-anim, html.theme-anim *{
+    transition:background-color .45s ease, color .45s ease, border-color .45s ease, box-shadow .45s ease !important;
+  }
+
+  /* ===== ripple ===== */
+  .ripple{ position:absolute; border-radius:50%; background:rgba(74,93,240,.32); pointer-events:none; transform:scale(0); opacity:1; }
+
+  /* ===== theme icon swap ===== */
+  #themeToggle{ display:flex; align-items:center; justify-content:center; }
+  #themeToggle .icon-sun, #themeToggle .icon-moon{ position:absolute; inset:0; margin:auto; width:18px; height:18px; }
+
+  /* ===== focus visibility ===== */
+  :where(button, a, [role="button"], input):focus-visible{
+    outline:2px solid var(--blue);
+    outline-offset:2px;
+    border-radius:9px;
+  }
+  .side-btn:focus-visible, .icon-btn:focus-visible{ outline-offset:3px; }
+  [role="button"]{ cursor:pointer; }
+
+  /* ===== reveal base state (JS-controlled) ===== */
+  .reveal{ opacity:0; }
+  .no-js .reveal{ opacity:1; }
+
+  /* Reduced motion overrides everything above */
+  @media (prefers-reduced-motion: reduce){
+    #loader{ display:none !important; }
+    .spotlight{ display:none !important; }
+    .reveal{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+
+<style>
+  :root{
+    --bg:#ececec; --panel:#f9f9f9; --card:#ffffff;
+    --ink:#000000; --ink-soft:#646464; --ink-faint:#a7a7a7;
+    --line:#e5e5e5; --line-strong:#d2d2d2;
+    --accent:#000000; --bezel:#000000; --bezel-2:#000000;
+    --blue:#e85002; --blue-soft:#ffe7d9;
+    --coral:#e85002; --coral-soft:#ffe0cf;
+    --gold:#f16001; --gold-soft:#ffe9d5;
+    --green:#333333; --green-soft:#e9e9e9;
+    --shadow-card:0 1px 1px rgba(0,0,0,.04), 0 6px 14px -8px rgba(0,0,0,.10), 0 24px 48px -24px rgba(0,0,0,.22);
+    --shadow-card-hover:0 4px 10px rgba(0,0,0,.07), 0 20px 40px -12px rgba(0,0,0,.2);
+  }
+  [data-theme="dark"]{
+    --bg:#0a0a0a; --panel:#000000; --card:#141414;
+    --ink:#f9f9f9; --ink-soft:#a7a7a7; --ink-faint:#646464;
+    --line:#242424; --line-strong:#333333; --accent:#f9f9f9;
+    --blue:#f16001; --blue-soft:#33150a;
+    --coral:#e85002; --coral-soft:#331302;
+    --gold:#f16001; --gold-soft:#33200f;
+    --green:#a7a7a7; --green-soft:#242424;
+  }
+  body{ background:
+    radial-gradient(1200px 600px at 20% -10%, #f6f6f6 0%, transparent 60%),
+    radial-gradient(1000px 500px at 90% 110%, #efe4d8 0%, transparent 55%),
+    var(--bg); }
+  [data-theme="dark"] body{ background:
+    radial-gradient(1200px 600px at 20% -10%, #171717 0%, transparent 60%),
+    radial-gradient(1000px 500px at 90% 110%, #24100a 0%, transparent 55%),
+    var(--bg); }
+
+  .card.accent-dark{ background:linear-gradient(125deg,#000000 0%, #150402 58%, #2b0a02 100%); border-color:#262626; }
+  [data-theme="dark"] .card.accent-dark{ background:linear-gradient(125deg,#0d0d0d 0%,#000000 100%); border-color:var(--line); }
+  .card.accent-dark .step-dot{ background:#232323; border-color:#333333; color:rgba(249,249,249,.55); }
+  .card.accent-dark .step.done .step-dot{ background:#f9f9f9; border-color:#f9f9f9; color:#000000; }
+  .card.accent-dark .step.now .step-dot{ background:#000000; border-color:#f16001; color:#f16001; }
+  .card.accent-dark .step-line{ background:#333333; }
+  .card.accent-dark .step.done .step-line, .card.accent-dark .step.now .step-line{ background:#f9f9f9; }
+  .card.accent-dark .step-lbl{ color:rgba(249,249,249,.6); }
+  .card.accent-dark .step.done .step-lbl, .card.accent-dark .step.now .step-lbl{ color:#ffffff; }
+  .card.accent-dark th{ color:rgba(249,249,249,.58); border-bottom-color:#2b2b2b; }
+  .card.accent-dark td{ border-bottom-color:#232323; }
+  .card.accent-dark .tl-body span{ color:rgba(249,249,249,.6); }
+
+  /* the four-stop branding gradient, used once */
+  .next-grid .card{ background:linear-gradient(160deg,#ffffff 0%,#f4ece3 100%); }
+  [data-theme="dark"] .next-grid .card{ background:linear-gradient(160deg,#181818 0%,#241610 100%); }
+  .shortlist-card{ background:linear-gradient(160deg,#fbfbfb 0%,#ededed 100%); }
+  [data-theme="dark"] .shortlist-card{ background:linear-gradient(160deg,#181818 0%,#0d0d0d 100%); }
+  .svc-icon{ background:linear-gradient(150deg,#f16001 0%,#c10801 100%); color:#ffffff; }
+  .trust-ribbon{ background:linear-gradient(120deg,#1c1c1c 0%,#000000 100%); color:#d9c3ab; }
+  .brand-mark, #loader .loader-mark{ background:linear-gradient(150deg,#e85002,#c10801) !important; }
+  .brand-mark svg, #loader .loader-mark svg{ color:#ffffff; }
+  #ringProgress{ stroke:#f16001; }
+  .tl-dot{ background:#e85002; }
+  .tl-item.done .tl-dot{ background:#a7a7a7; }
+  .status-pill.live, .match-high{ background:#e9e9e9; color:#333333; }
+  .status-pill.draft, .match-mid{ background:#ffe9d5; color:#a33f01; }
+  [data-theme="dark"] .status-pill.live, [data-theme="dark"] .match-high{ background:#242424; color:#c9c9c9; }
+  [data-theme="dark"] .status-pill.draft, [data-theme="dark"] .match-mid{ background:#33200f; color:#f16001; }
+  .mini-btn.done{ background:#ffe7d9; color:#a33f01; }
+  .spotlight-glow{ background:radial-gradient(circle, rgba(232,80,2,.13), transparent 70%); }
+  [data-theme="dark"] .spotlight-glow{ background:radial-gradient(circle, rgba(241,96,1,.16), transparent 70%); }
+  .ripple{ background:rgba(232,80,2,.3); }
+  @keyframes pulseRing{
+    0%{ box-shadow:0 0 0 4px var(--blue-soft), 0 0 0 4px rgba(232,80,2,.45); }
+    70%{ box-shadow:0 0 0 4px var(--blue-soft), 0 0 0 15px rgba(232,80,2,0); }
+    100%{ box-shadow:0 0 0 4px var(--blue-soft), 0 0 0 4px rgba(232,80,2,0); }
+  }
+</style>
+
+<style>
+  /* ============ v2: systems ============ */
+  :root{
+    --t-xs:11.5px; --t-sm:13px; --t-md:14.5px; --t-lg:17px; --t-xl:22px; --t-2xl:32px;
+    --tint:#f8f3fa; --tint-line:#ece2f0;
+    --elev-1:0 1px 1px rgba(58,3,83,.04), 0 6px 14px -8px rgba(58,3,83,.12);
+    --elev-2:0 2px 4px rgba(58,3,83,.07), 0 18px 34px -14px rgba(58,3,83,.24), 0 44px 74px -44px rgba(58,3,83,.32);
+  }
+  [data-theme="dark"]{
+    --tint:#1f0d2b; --tint-line:#2f1540;
+    --elev-1:0 1px 1px rgba(0,0,0,.4), 0 6px 14px -8px rgba(0,0,0,.55);
+    --elev-2:0 2px 4px rgba(0,0,0,.5), 0 18px 34px -14px rgba(0,0,0,.7), 0 44px 74px -44px rgba(0,0,0,.8);
+  }
+
+  /* six type steps, replacing the twelve ad-hoc sizes */
+  .brand, .panel-head h3{ font-size:var(--t-lg); }
+  .j-head h1{ font-size:var(--t-2xl); }
+  .j-head p{ font-size:var(--t-md); }
+  .stat-num{ font-size:var(--t-xl); }
+  .pillnav button, .task-label, .row-label, .svc-card p, td, .tl-body b, .svc-link{ font-size:var(--t-sm); }
+  .svc-card h4, .comm-card h5, .shortlist-card h5, .comm-col h3, .sec-head h2{ font-size:var(--t-md); }
+  .chip, .col-label, .stat-lbl, .step-lbl, th, .status-pill, .match-pill, .svc-tag,
+  .comm-card .eyebrow, .comm-card p, .shortlist-card p, .tl-body span, .comm-view-all,
+  .due, .svc-why, .sec-head span{ font-size:var(--t-xs); }
+
+  /* three elevation levels instead of one */
+  .card{ box-shadow:var(--elev-1); }
+  .list-card{ background:var(--tint); border-color:var(--tint-line); box-shadow:none; }
+  .shortlist-card{ box-shadow:none; border-color:var(--tint-line); }
+  .stack .task{ box-shadow:none; }
+  .row:hover{ background:var(--card); }
+
+  /* ---- focal card: one per view, top of the page ---- */
+  .focus-card{
+    display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:26px;
+    padding:24px 28px; border-radius:var(--r-lg); margin-bottom:22px;
+    background:linear-gradient(135deg,#f8d299 0%, #f59e51 100%);
+    border:1px solid #efb478; color:#3a0353; box-shadow:var(--elev-2);
+  }
+  .focus-count{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:46px; line-height:.9; letter-spacing:-.04em; }
+  .focus-count small{
+    display:block; margin-top:8px; font-size:10.5px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; opacity:.62;
+  }
+  .focus-body h2{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:var(--t-lg); letter-spacing:-.01em; }
+  .focus-body p{ font-size:var(--t-sm); line-height:1.5; margin-top:5px; opacity:.82; max-width:52ch; }
+  .focus-cta{
+    appearance:none; border:none; cursor:pointer; white-space:nowrap;
+    font-family:'Montserrat',sans-serif; font-weight:700; font-size:var(--t-sm);
+    padding:13px 22px; border-radius:999px; background:#3a0353; color:#f8d299;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .focus-cta:hover{ transform:translateY(-1px); box-shadow:0 8px 18px -8px rgba(58,3,83,.6); }
+  .focus-rule{ border:none; height:1px; background:var(--line); margin:30px 0 24px; }
+
+  /* ---- board columns: label above, proportional widths ---- */
+  /* min-width so this cannot outrank the collapses below; minmax(0,…) stops row
+     content (avatar + label + date + buttons) from forcing tracks past their share */
+  @media (min-width:1181px){
+    .j-board{ grid-template-columns:repeat(3, minmax(0,1fr)) minmax(0,.82fr); }
+  }
+  @media (max-width:1180px){
+    .j-board{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width:900px){
+    .j-board{ grid-template-columns:minmax(0,1fr); }
+  }
+  .j-col{ display:flex; flex-direction:column; gap:11px; min-width:0; }
+  .stack, .list-card, .next-grid{ min-width:0; }
+  .row-label, .task-label{ min-width:0; overflow-wrap:anywhere; }
+  .col-label{
+    margin-top:0; text-align:left; display:flex; align-items:center; gap:8px;
+    text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft);
+  }
+  .col-count{
+    font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;
+    background:var(--tint); border:1px solid var(--tint-line); color:var(--ink-soft);
+  }
+
+  /* ---- deadlines + done/pending distinction ---- */
+  .due{ font-weight:600; color:var(--ink-soft); flex:none; white-space:nowrap; }
+  .due.soon{ color:#8a4b06; background:var(--gold-soft); padding:3px 9px; border-radius:999px; }
+  [data-theme="dark"] .due.soon{ color:#f8d299; background:#4a3417; }
+  .is-done .row-label, .is-done .task-label{ color:var(--ink-soft); }
+  .is-done .due{ color:var(--ink-faint); font-weight:500; }
+  .stack .task .due{ margin-top:-4px; }
+
+  /* ---- what unlocks a locked stage ---- */
+  .step-note{
+    font-size:10px; line-height:1.3; text-align:center; max-width:112px;
+    color:var(--ink-faint); margin-top:-3px;
+  }
+  .card.accent-dark .step-note{ color:rgba(247,239,251,.4); }
+
+  /* ---- section headers, priority services, empty states ---- */
+  .sec-head{ display:flex; align-items:baseline; gap:10px; margin:28px 0 14px; }
+  .sec-head:first-child{ margin-top:0; }
+  .sec-head h2{ font-family:'Montserrat',sans-serif; font-weight:700; letter-spacing:-.01em; }
+  .sec-head span{ color:var(--ink-soft); }
+  .svc-card.priority{ border-color:#efc48f; background:linear-gradient(160deg,#fffaf2 0%,#fdf2e2 100%); }
+  [data-theme="dark"] .svc-card.priority{ background:linear-gradient(160deg,#3a2318 0%,#2a1338 100%); border-color:#5c3a1e; }
+  .svc-why{ font-weight:700; color:#8a4b06; }
+  [data-theme="dark"] .svc-why{ color:#f8d299; }
+  .empty{ display:none; padding:52px 20px; text-align:center; color:var(--ink-soft); font-size:var(--t-sm); }
+  .empty.on{ display:block; }
+  .empty b{ display:block; font-family:'Montserrat',sans-serif; font-size:var(--t-md); color:var(--ink); margin-bottom:6px; }
+
+  .panel-head h3, .sec-head h2, .col-label, .chip, .pillnav button, .svc-tag, .status-pill{ white-space:nowrap; }
+  .panel-note{ font-size:var(--t-xs); font-weight:600; color:var(--ink-soft); }
+  .comm-search{ max-width:320px; width:100%; }
+  .col-label{ min-width:0; }
+
+  /* ---- advisor stack, named ---- */
+  .team{ display:flex; flex-direction:column; align-items:flex-end; gap:7px; }
+  .team-lbl{ font-size:var(--t-xs); font-weight:600; color:var(--ink-soft); }
+
+  /* ---- mobile: rail becomes a bottom bar, so only one top bar remains ---- */
+  @media (max-width:620px){
+    .sidebar{
+      position:fixed; bottom:0; left:0; right:0; z-index:9;
+      width:auto; flex-direction:row; justify-content:space-around;
+      padding:9px 12px; border-top:1px solid var(--line); border-bottom:none; border-right:none;
+      background:var(--card);
+    }
+    .side-gap{ display:none; }
+    .main{ padding-bottom:74px; }
+    .focus-card{ grid-template-columns:1fr; gap:16px; padding:20px; }
+    .focus-cta{ width:100%; }
+  }
+</style>
+
+<style>
+  /* ember: overrides that must win over the shared v2 system block */
+  :root{
+    --tint:#f4f4f4; --tint-line:#e7e7e7;
+    --elev-1:0 1px 1px rgba(0,0,0,.04), 0 6px 14px -8px rgba(0,0,0,.12);
+    --elev-2:0 2px 4px rgba(0,0,0,.07), 0 18px 34px -14px rgba(0,0,0,.24), 0 44px 74px -44px rgba(0,0,0,.3);
+  }
+  [data-theme="dark"]{
+    --tint:#161616; --tint-line:#262626;
+    --elev-1:0 1px 1px rgba(0,0,0,.5), 0 6px 14px -8px rgba(0,0,0,.6);
+    --elev-2:0 2px 4px rgba(0,0,0,.6), 0 18px 34px -14px rgba(0,0,0,.75), 0 44px 74px -44px rgba(0,0,0,.85);
+  }
+  .focus-card{
+    background:linear-gradient(120deg,#000000 0%, #c10801 44%, #f16001 84%, #d9c3ab 100%);
+    border-color:#c10801; color:#ffffff;
+  }
+  .focus-count small{ opacity:.72; }
+  .focus-body p{ opacity:.88; }
+  .focus-cta{ background:#ffffff; color:#c10801; }
+  .focus-cta:hover{ box-shadow:0 8px 18px -8px rgba(0,0,0,.55); }
+  .due.soon{ color:#a33f01; background:#ffe9d5; }
+  [data-theme="dark"] .due.soon{ color:#f16001; background:#33200f; }
+  .svc-card.priority{ border-color:#f0b184; background:linear-gradient(160deg,#fffaf6 0%,#fdefe6 100%); }
+  [data-theme="dark"] .svc-card.priority{ background:linear-gradient(160deg,#241610 0%,#0d0d0d 100%); border-color:#4a2416; }
+  .svc-why{ color:#a33f01; }
+  [data-theme="dark"] .svc-why{ color:#f16001; }
+</style>
+</head>
+<body>
+
+  <div id="loader">
+    <div class="loader-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg>
+    </div>
+    <div class="loader-bar"><i></i></div>
+  </div>
+
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <div class="screen">
+
+    <div class="app">
+      <!-- sidebar: utility rail, not a duplicate of the section nav -->
+      <nav class="sidebar" id="sidebarRail" aria-label="Tools">
+        <div class="side-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div class="side-btn" title="Messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="side-dot"></span></div>
+        <div class="side-btn" title="Document vault"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <div class="side-btn" title="Help &amp; support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg></div>
+        <div class="side-gap"></div>
+        <div class="side-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+        <div class="side-btn" id="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+      </nav>
+
+      <!-- main -->
+      <div class="main">
+        <div class="topbar">
+          <div class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+            atlas
+          </div>
+
+          <nav class="pillnav" id="pillnav" aria-label="Sections">
+            <button data-view="home">Home</button>
+            <button data-view="journey" class="active">Journey</button>
+            <button data-view="services">Services</button>
+            <button data-view="community">Community</button>
+          </nav>
+
+          <div class="top-right">
+            <div class="icon-btn" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="side-dot"></span></div>
+            <div class="profile-btn" title="Account menu">
+              <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== JOURNEY VIEW ===================== -->
+        <div class="view active" id="view-journey">
+          <div class="j-head reveal">
+            <div>
+              <h1>Your Journey</h1>
+              <p>Manchester &amp; UCL applications in progress. Three tasks need you this week - your advisors are one tap away.</p>
+            </div>
+            <div class="team">
+              <span class="team-lbl">Your advisors and 4 peers on the same course</span>
+              <div style="display:flex; align-items:center;">
+              <div class="avatar-stack">
+                <div class="a"><img src="https://i.pravatar.cc/100?img=32" alt=""><span class="badge" style="background:var(--blue);">2</span></div>
+                <div class="a"><img src="https://i.pravatar.cc/100?img=12" alt=""><span class="badge" style="background:var(--coral);">1</span></div>
+                <div class="a"><img src="https://i.pravatar.cc/100?img=5" alt=""></div>
+                <div class="a"><img src="https://i.pravatar.cc/100?img=68" alt=""></div>
+                <div class="a more">+4</div>
+              </div>
+              <div class="board-toolbar">
+                <div class="icon-btn" title="Add task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                <div class="icon-btn" title="Open calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="focus-card reveal">
+            <div class="focus-count">6<small>days left</small></div>
+            <div class="focus-body">
+              <h2>Visa biometrics appointment</h2>
+              <p>Book your slot at the Manchester visa centre before 6 September. Your CAS number and financial evidence must be uploaded first.</p>
+            </div>
+            <button type="button" class="focus-cta">Book appointment</button>
+          </div>
+
+          <div class="card accent-dark stage-rail reveal">
+            <div class="stepper">
+              <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Applied</div></div>
+              <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Offer</div></div>
+              <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Accepted</div></div>
+              <div class="step now"><div class="step-line"></div><div class="step-dot">4</div><div class="step-lbl">Visa</div></div>
+              <div class="step locked"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div class="step-lbl">Pre-departure</div><div class="step-note">Unlocks on visa approval</div></div>
+              <div class="step locked"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div class="step-lbl">Arrival</div><div class="step-note">Unlocks 7 days before travel</div></div>
+            </div>
+          </div>
+
+          <div class="j-board">
+            <!-- col 1: shortlist -->
+            <div class="j-col reveal">
+              <div class="col-label">Shortlist <span class="col-count">2/2</span></div>
+              <div class="stack">
+                <div class="task is-done">
+                  <div class="task-top">
+                    <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=32" alt=""></div>
+                    <div class="task-actions">
+                      <div class="mini-btn done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+                      <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                    </div>
+                  </div>
+                  <div class="task-label">Shortlist confirmed with advisor</div>
+                  <div class="due">Done 28 Jul</div>
+                </div>
+                <div class="task is-done">
+                  <div class="task-top">
+                    <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=32" alt=""></div>
+                    <div class="task-actions">
+                      <div class="mini-btn done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+                      <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                    </div>
+                  </div>
+                  <div class="task-label">SOP reviewed, ready to submit</div>
+                  <div class="due">Done 30 Jul</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- col 2: applications -->
+            <div class="j-col reveal">
+              <div class="col-label">Applications <span class="col-count">5/5</span></div>
+              <div class="list-card">
+                <div class="row is-done">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=12" alt=""></div>
+                  <div class="row-label">Personal statement submitted</div>
+                  <div class="due">2 Aug</div>
+                  <div class="task-actions">
+                    <div class="mini-btn done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+                    <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                  </div>
+                </div>
+                <div class="row is-done">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=12" alt=""></div>
+                  <div class="row-label">Academic references uploaded</div>
+                  <div class="due">5 Aug</div>
+                  <div class="task-actions">
+                    <div class="mini-btn done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+                    <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                  </div>
+                </div>
+                <div class="row is-done">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=5" alt=""></div>
+                  <div class="row-label">UCAS application fee paid</div>
+                  <div class="due">5 Aug</div>
+                  <div class="task-actions">
+                    <div class="mini-btn done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+                    <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                  </div>
+                </div>
+                <div class="row" style="background:var(--blue-soft); border-radius:14px;">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=68" alt=""></div>
+                  <div class="row-label">Offer received - University of Manchester</div>
+                  <div class="due">12 Aug</div>
+                  <div class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></div>
+                </div>
+                <div class="row is-done">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=68" alt=""></div>
+                  <div class="row-label">Offer accepted - deposit paid</div>
+                  <div class="due">18 Aug</div>
+                  <div class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- col 3: visa & docs -->
+            <div class="j-col reveal">
+              <div class="col-label">Visa &amp; docs <span class="col-count">1/4</span></div>
+              <div class="list-card">
+                <div class="row">
+                  <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                  <div class="row-label">CAS number requested</div>
+                  <div class="due soon">Due 2 Sept</div>
+                </div>
+                <div class="row">
+                  <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                  <div class="row-label">Financial evidence check</div>
+                  <div class="due">Due 4 Sept</div>
+                </div>
+                <div class="row" style="background:var(--coral-soft); border-radius:14px;">
+                  <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=5" alt=""></div>
+                  <div class="row-label">Visa biometrics appointment</div>
+                  <div class="due soon">Due 6 Sept</div>
+                  <div class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></div>
+                </div>
+                <div class="row">
+                  <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                  <div class="row-label">TB test certificate</div>
+                  <div class="due">Due 10 Sept</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- col 4: destination -->
+            <div class="dest-wrap j-col reveal">
+              <div class="col-label">After the visa <span class="col-count">4</span></div>
+              <div class="next-grid">
+                <div class="card tilt">Housing<br>shortlist</div>
+                <div class="card tilt">Bank account<br>setup</div>
+                <div class="card tilt">SIM &amp;<br>mobile plan</div>
+                <div class="card tilt">Travel<br>insurance</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- bottom split -->
+          <hr class="focus-rule">
+          <div class="split">
+            <div class="card reveal">
+              <div class="panel-head">
+                <h3>Suggested guides</h3>
+                <div class="panel-tools">
+                  <div class="icon-btn" title="Add guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                  <div class="icon-btn" title="Export guides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></div>
+                </div>
+              </div>
+              <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th>Guide</th><th>Status</th><th>Updated</th><th>Read time</th><th>Author</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Opening a UK student bank account</td>
+                    <td><span class="status-pill live">Published</span></td>
+                    <td>18 Aug 2026</td>
+                    <td>4 min</td>
+                    <td><div class="row-user"><img src="https://i.pravatar.cc/60?img=26" alt="">Nikhil</div></td>
+                  </tr>
+                  <tr>
+                    <td>Packing for your first UK winter</td>
+                    <td><span class="status-pill live">Published</span></td>
+                    <td>22 Aug 2026</td>
+                    <td>6 min</td>
+                    <td><div class="row-user"><img src="https://i.pravatar.cc/60?img=15" alt="">Rohan</div></td>
+                  </tr>
+                  <tr>
+                    <td>Student visa biometrics, step by step</td>
+                    <td><span class="status-pill draft">Draft</span></td>
+                    <td>27 Aug 2026</td>
+                    <td>5 min</td>
+                    <td><div class="row-user"><img src="https://i.pravatar.cc/60?img=33" alt="">Meera</div></td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+
+            <div class="card reveal">
+              <div class="panel-head">
+                <h3>Community journey</h3>
+                <div class="panel-tools">
+                  <div class="icon-btn" title="Add milestone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+                </div>
+              </div>
+              <div class="mini-timeline">
+                <div class="tl-item done">
+                  <div class="tl-dot"></div>
+                  <div class="tl-body"><b>Pre-departure meetup - online</b><span>Hosted by 6 students headed to Manchester</span></div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div class="tl-body"><b>Arrival week checklist unlocks</b><span>SIM, bank, GP registration, campus tour</span></div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div class="tl-body"><b>Part-time job board opens</b><span>Curated listings within your visa hours</span></div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div class="tl-body"><b>Alumni mentor matching</b><span>Get paired once you accept your offer</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== HOME VIEW ===================== -->
+        <div class="view" id="view-home">
+          <div class="j-head reveal">
+            <div>
+              <h1>Welcome back, Harman</h1>
+              <p>You're in the visa stage now. Pre-departure unlocks once your CAS and biometrics are done.</p>
+            </div>
+          </div>
+
+          <div class="focus-card reveal">
+            <div class="focus-count">3<small>tasks this week</small></div>
+            <div class="focus-body">
+              <h2>Your visa stage needs three things</h2>
+              <p>CAS number, financial evidence and biometrics. Everything after arrival stays locked until the visa decision lands.</p>
+            </div>
+            <button type="button" class="focus-cta">Open the visa checklist</button>
+          </div>
+
+          <div class="home-grid">
+            <div>
+              <div class="card accent-dark ring-card reveal">
+                <svg class="ring" viewBox="0 0 120 120" id="profileRing">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--line-strong)" stroke-width="12"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--green)" stroke-width="12" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" transform="rotate(-90 60 60)" id="ringProgress"/>
+                  <text x="60" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="currentColor" id="ringLabel">0%</text>
+                </svg>
+                <div>
+                  <div style="font-weight:700; font-size:15px;">Profile complete</div>
+                  <div style="opacity:.8; font-size:13px; margin-top:4px; line-height:1.5;">Add your English test score to unlock 3 more university matches.</div>
+                </div>
+              </div>
+
+              <div class="stat-row">
+                <div class="card reveal"><div class="stat-num" data-count="4">0</div><div class="stat-lbl">Applications</div></div>
+                <div class="card reveal"><div class="stat-num" data-count="2">0</div><div class="stat-lbl">Offers</div></div>
+                <div class="card reveal"><div class="stat-num" data-count="9" data-suffix="/13">0/13</div><div class="stat-lbl">Documents</div></div>
+              </div>
+
+            </div>
+
+            <div class="home-side">
+              <div class="card reveal">
+                <div class="panel-head"><h3>Next up</h3><span class="panel-note">3 this week</span></div>
+                <div class="list-card tasklist">
+                  <div class="row"><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div><div class="row-label">Accept your Manchester offer</div><div class="due soon">Due 2 Sept</div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div></div>
+                  <div class="row"><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div><div class="row-label">Upload IELTS score to profile</div><div class="due">Due 8 Sept</div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div></div>
+                  <div class="row"><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div><div class="row-label">Compare housing near campus</div><div class="due">Due 20 Sept</div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div></div>
+                </div>
+              </div>
+
+              <div class="card reveal">
+                <div class="panel-head"><h3>Your advisors</h3></div>
+                <div class="list-card">
+                  <div class="row"><div class="p-avatar"><img src="https://i.pravatar.cc/100?img=32" alt="Priya S."></div><div class="row-label">Application advisor<br><span style="color:var(--ink-soft); font-weight:500;">Priya S.</span></div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div></div>
+                  <div class="row"><div class="p-avatar"><img src="https://i.pravatar.cc/100?img=12" alt="James O."></div><div class="row-label">Visa specialist<br><span style="color:var(--ink-soft); font-weight:500;">James O.</span></div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card reveal" style="margin-top:22px;">
+            <div class="panel-head">
+              <h3>Your shortlist</h3>
+              <span class="svc-link" style="cursor:pointer;">View full journey<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+            <div class="shortlist-grid">
+              <div class="shortlist-card tilt">
+                <div class="match-pill match-high">96% match</div>
+                <h5>University of Manchester</h5>
+                <p>MSc Data Science · Offer accepted</p>
+              </div>
+              <div class="shortlist-card tilt">
+                <div class="match-pill match-high">91% match</div>
+                <h5>UCL</h5>
+                <p>MSc Data Science · Awaiting decision</p>
+              </div>
+              <div class="shortlist-card tilt">
+                <div class="match-pill match-mid">84% match</div>
+                <h5>University of Leeds</h5>
+                <p>MSc Data Science · Not yet applied</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== SERVICES VIEW ===================== -->
+        <div class="view" id="view-services">
+          <div class="j-head reveal">
+            <div>
+              <h1>Services</h1>
+              <p>Vetted partners for everything you need to land and settle - no commissions steering the list.</p>
+            </div>
+          </div>
+
+          <div class="trust-ribbon reveal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            Every partner here is vetted on our terms, not theirs - Atlas doesn't take a cut of what you choose.
+          </div>
+
+          <div class="sec-head reveal"><h2>Needed for your visa stage</h2><span>3 of 6</span></div>
+          <div class="chip-row reveal" id="svcFilters">
+            <button class="chip active" data-cat="all">All services</button>
+            <button class="chip" data-cat="bank">Banking</button>
+            <button class="chip" data-cat="sim">SIM &amp; mobile</button>
+            <button class="chip" data-cat="housing">Housing</button>
+            <button class="chip" data-cat="forex">Forex</button>
+            <button class="chip" data-cat="insurance">Insurance</button>
+            <button class="chip" data-cat="loans">Loans</button>
+          </div>
+
+          <div class="svc-grid" id="svcGrid">
+            <div class="card svc-card reveal tilt" data-cat="bank">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 9l9-6 9 6"/><path d="M7 13v4M12 13v4M17 13v4"/></svg></div>
+              <h4>UK bank account</h4>
+              <p>Compare student accounts that don't need a UK address on day one.</p>
+              <div class="svc-foot"><span class="svc-tag">4 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+            <div class="card svc-card reveal tilt" data-cat="sim">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+              <h4>SIM &amp; mobile plan</h4>
+              <p>eSIMs you can activate before you land, plus long-term UK plans.</p>
+              <div class="svc-foot"><span class="svc-tag">3 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+            <div class="card svc-card reveal tilt" data-cat="housing">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg></div>
+              <h4>Housing</h4>
+              <p>Verified student accommodation near your campus, no agent fees.</p>
+              <div class="svc-foot"><span class="svc-tag">6 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+            <div class="card svc-card priority reveal tilt" data-cat="forex" data-priority="1">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <h4>Foreign exchange</h4><span class="svc-why">Proves your financial evidence</span>
+              <p>Send tuition and living costs at rates better than your bank's.</p>
+              <div class="svc-foot"><span class="svc-tag">3 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+            <div class="card svc-card priority reveal tilt" data-cat="insurance" data-priority="1">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
+              <h4>Insurance</h4><span class="svc-why">Required by your visa conditions</span>
+              <p>Health and travel cover that satisfies your visa requirements.</p>
+              <div class="svc-foot"><span class="svc-tag">2 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+            <div class="card svc-card priority reveal tilt" data-cat="loans" data-priority="1">
+              <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg></div>
+              <h4>Student loans</h4><span class="svc-why">Accepted as proof of funds</span>
+              <p>Collateral-free lenders that work with your university's cost of attendance.</p>
+              <div class="svc-foot"><span class="svc-tag">5 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+          </div>
+          <div class="empty" id="svcEmpty"><b>No services in this category yet</b>We are still vetting partners here. Try another filter.</div>
+        </div>
+
+        <!-- ===================== COMMUNITY VIEW ===================== -->
+        <div class="view" id="view-community">
+          <div class="j-head reveal">
+            <div>
+              <h1>Community</h1>
+              <p>Jobs, events and guides for life after you land - the part of the journey that doesn't end at arrival.</p>
+            </div>
+            <label class="url-bar comm-search" style="margin:0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="search" id="commSearch" placeholder="Search jobs, events, guides" aria-label="Search jobs, events and guides">
+            </label>
+          </div>
+          <div class="comm-grid" id="commGrid">
+            <div class="comm-col reveal">
+              <h3><span class="dot" style="background:var(--blue);"></span>Jobs<span class="comm-view-all">View all</span></h3>
+              <div class="card comm-card tilt"><div class="eyebrow">Part-time · Manchester</div><h5>Library assistant, University of Manchester</h5><p>18 hrs/wk · within standard visa work limits</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">Part-time · Remote</div><h5>Content intern, student-run publication</h5><p>Flexible hours · portfolio-building role</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">Graduate route</div><h5>Junior analyst, fintech scale-up</h5><p>Sponsors Skilled Worker visa applicants</p></div>
+            </div>
+            <div class="comm-col reveal">
+              <h3><span class="dot" style="background:var(--coral);"></span>Events<span class="comm-view-all">View all</span></h3>
+              <div class="card comm-card tilt"><div class="eyebrow">3 Sept · Online</div><h5>Pre-departure briefing: what to pack</h5><p>Hosted by students already in Manchester</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">10 Sept · Leeds</div><h5>New arrivals meetup</h5><p>Coffee, SIM cards, and a campus walk-through</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">14 Sept · Online</div><h5>Opening your bank account, live Q&amp;A</h5><p>With a partner bank's student team</p></div>
+            </div>
+            <div class="comm-col reveal">
+              <h3><span class="dot" style="background:var(--green);"></span>Guides<span class="comm-view-all">View all</span></h3>
+              <div class="card comm-card tilt"><div class="eyebrow">6 min read</div><h5>Registering with a GP in your first week</h5><p>What the NHS actually requires from you</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">4 min read</div><h5>Council tax exemption for students</h5><p>The one form that saves you real money</p></div>
+              <div class="card comm-card tilt"><div class="eyebrow">5 min read</div><h5>Building UK credit history from zero</h5><p>Why it matters before you graduate</p></div>
+            </div>
+          </div>
+          <div class="empty" id="commEmpty"><b>Nothing matches that search</b>Try a shorter phrase, or clear the field to see everything.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const skipGSAP = typeof gsap === 'undefined' || !window.gsap;
+  if (!skipGSAP && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+  // No-GSAP fallback: wire everything up plainly
+  function initFallback(){
+    const loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'none';
+    document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = '1'; });
+    const journey = document.getElementById('view-journey');
+    if (journey) journey.classList.add('active');
+    const ring = document.getElementById('ringProgress');
+    const label = document.getElementById('ringLabel');
+    if (ring) ring.setAttribute('stroke-dashoffset', '88');
+    if (label) label.textContent = '72%';
+    document.querySelectorAll('.stat-num[data-count]').forEach(el => {
+      el.textContent = el.dataset.count + (el.dataset.suffix || '');
+    });
+  }
+
+  /* ---------- helpers ---------- */
+  function animateCountUp(el, target, suffix){
+    if (REDUCE){ el.textContent = target + (suffix || ''); return; }
+    const obj = { v: 0 };
+    gsap.to(obj, {
+      v: target, duration: 1.1, ease: 'power2.out',
+      onUpdate(){ el.textContent = Math.round(obj.v) + (suffix || ''); }
+    });
+  }
+
+  function spawnRipple(el){
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2.4;
+    const span = document.createElement('span');
+    span.className = 'ripple';
+    span.style.width = span.style.height = size + 'px';
+    span.style.left = (rect.width / 2 - size / 2) + 'px';
+    span.style.top = (rect.height / 2 - size / 2) + 'px';
+    getComputedStyle(el).position === 'static' && (el.style.position = 'relative');
+    const prevOverflow = el.style.overflow;
+    el.style.overflow = 'hidden';
+    el.appendChild(span);
+    gsap.to(span, { scale: 1, opacity: 0, duration: .6, ease: 'power2.out', onComplete(){ span.remove(); el.style.overflow = prevOverflow; } });
+  }
+
+  /* ---------- view reveal (boot + tab switch) ---------- */
+  function revealView(view){
+    const items = view.querySelectorAll(':scope .reveal');
+    if (!items.length) return;
+    if (REDUCE){ gsap.set(items, { opacity: 1, y: 0, rotationX: 0, rotationY: 0 }); return; }
+    gsap.set(items, { rotationX: 0, rotationY: 0 });
+    view.querySelectorAll('.tilt').forEach(t => gsap.set(t, { rotationX: 0, rotationY: 0, y: 0 }));
+    gsap.fromTo(items,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: .65, ease: 'power3.out', stagger: .07, overwrite: 'auto' }
+    );
+  }
+
+  function runHomeExtras(view){
+    const ring = view.querySelector('#ringProgress');
+    const label = view.querySelector('#ringLabel');
+    if (ring && !ring.dataset.animated){
+      ring.dataset.animated = '1';
+      if (REDUCE){
+        ring.setAttribute('stroke-dashoffset', 88);
+        if (label) label.textContent = '72%';
+      } else {
+        gsap.fromTo(ring, { strokeDashoffset: 314 }, { strokeDashoffset: 88, duration: 1.3, delay: .25, ease: 'power2.inOut' });
+        if (label){
+          const obj = { v: 0 };
+          gsap.to(obj, { v: 72, duration: 1.3, delay: .25, ease: 'power2.inOut', onUpdate(){ label.textContent = Math.round(obj.v) + '%'; } });
+        }
+      }
+    }
+    view.querySelectorAll('.stat-num[data-count]').forEach(el => {
+      if (el.dataset.animated) return;
+      el.dataset.animated = '1';
+      animateCountUp(el, +el.dataset.count, el.dataset.suffix || '');
+    });
+  }
+
+  /* ---------- tab switching ---------- */
+  const pillnav = document.getElementById('pillnav');
+  pillnav.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn || btn.classList.contains('active')) return;
+    pillnav.querySelectorAll('button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-current','false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-current','page');
+
+    const current = document.querySelector('.view.active');
+    const next = document.getElementById('view-' + btn.dataset.view);
+    if (current === next) return;
+
+    const doSwitch = () => {
+      if (current){ current.classList.remove('active'); gsap.set(current, { clearProps: 'opacity,transform' }); }
+      next.classList.add('active');
+      if (!skipGSAP){
+        gsap.set(next, { opacity: 1, y: 0 });
+        revealView(next);
+        if (next.id === 'view-home') runHomeExtras(next);
+        setupScrollReveals();
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      }
+      window.scrollTo(0, 0);
+    };
+
+    if (skipGSAP || REDUCE || !current){ doSwitch(); return; }
+    gsap.to(current, { opacity: 0, y: -10, duration: .22, ease: 'power2.in', onComplete: doSwitch });
+  });
+
+  /* ---------- services filter ---------- */
+  const svcFilters = document.getElementById('svcFilters');
+  svcFilters.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    svcFilters.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const cat = chip.dataset.cat;
+    const cards = Array.from(document.querySelectorAll('#svcGrid .svc-card'));
+    const matches = cards.filter(c => cat === 'all' || c.dataset.cat === cat);
+    document.getElementById('svcEmpty').classList.toggle('on', matches.length === 0);
+    const secHead = document.querySelector('#view-services .sec-head');
+    if (secHead) secHead.style.display = cat === 'all' ? '' : 'none';
+    const toHide = cards.filter(c => cat !== 'all' && c.dataset.cat !== cat && !c.classList.contains('hide'));
+    const toShow = cards.filter(c => (cat === 'all' || c.dataset.cat === cat) && c.classList.contains('hide'));
+
+    if (skipGSAP || REDUCE){
+      cards.forEach(c => c.classList.toggle('hide', cat !== 'all' && c.dataset.cat !== cat));
+      return;
+    }
+    if (toHide.length){
+      gsap.to(toHide, { opacity: 0, scale: .92, duration: .18, ease: 'power2.in', onComplete(){ toHide.forEach(c => c.classList.add('hide')); } });
+    }
+    if (toShow.length){
+      toShow.forEach(c => c.classList.remove('hide'));
+      gsap.fromTo(toShow, { opacity: 0, scale: .92 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(1.6)', stagger: .05, delay: toHide.length ? .12 : 0 });
+    }
+  });
+
+  /* ---------- sidebar rail: selectable tools ---------- */
+  const rail = document.getElementById('sidebarRail');
+  rail.addEventListener('click', (e) => {
+    const btn = e.target.closest('.side-btn');
+    if (!btn || btn.id === 'themeToggle') return;
+    const wasOn = btn.getAttribute('aria-pressed') === 'true';
+    rail.querySelectorAll('.side-btn').forEach(b => {
+      if (b.id !== 'themeToggle') b.setAttribute('aria-pressed', 'false');
+    });
+    btn.setAttribute('aria-pressed', wasOn ? 'false' : 'true');
+    btn.querySelector('.side-dot')?.remove();
+    if (!skipGSAP && !REDUCE) gsap.fromTo(btn, { scale: .82 }, { scale: 1, duration: .4, ease: 'back.out(3)' });
+  });
+
+  /* ---------- notification bell clears its dot ---------- */
+  document.querySelector('.top-right .icon-btn')?.addEventListener('click', function(){
+    this.querySelector('.side-dot')?.remove();
+  });
+
+  /* ---------- community search ---------- */
+  const commSearch = document.getElementById('commSearch');
+  const commEmpty = document.getElementById('commEmpty');
+  commSearch.addEventListener('input', () => {
+    const q = commSearch.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('#commGrid .comm-card').forEach(card => {
+      const hit = !q || card.textContent.toLowerCase().includes(q);
+      card.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    // hide a column heading when the search empties that column
+    document.querySelectorAll('#commGrid .comm-col').forEach(col => {
+      const any = [...col.querySelectorAll('.comm-card')].some(c => c.style.display !== 'none');
+      col.style.display = any ? '' : 'none';
+    });
+    commEmpty.classList.toggle('on', shown === 0);
+  });
+
+  /* ---------- theme toggle ---------- */
+  const themeToggle = document.getElementById('themeToggle');
+  const iconSun = themeToggle.querySelector('.icon-sun');
+  const iconMoon = themeToggle.querySelector('.icon-moon');
+  if (!skipGSAP){
+    gsap.set(iconSun, { opacity: 0, rotate: -90 });
+    gsap.set(iconMoon, { opacity: 1, rotate: 0 });
+  } else {
+    iconSun.style.opacity = '0';
+    iconSun.style.transform = 'rotate(-90deg)';
+    iconMoon.style.opacity = '1';
+    iconMoon.style.transform = 'rotate(0deg)';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const html = document.documentElement;
+    const goingDark = html.getAttribute('data-theme') !== 'dark';
+    html.classList.add('theme-anim');
+    html.setAttribute('data-theme', goingDark ? 'dark' : 'light');
+    setTimeout(() => html.classList.remove('theme-anim'), 500);
+
+    if (skipGSAP || REDUCE){
+      iconSun.style.opacity = goingDark ? '1' : '0';
+      iconMoon.style.opacity = goingDark ? '0' : '1';
+      return;
+    }
+    gsap.to(goingDark ? iconMoon : iconSun, { opacity: 0, rotate: goingDark ? 90 : -90, duration: .3, ease: 'power2.in' });
+    gsap.to(goingDark ? iconSun : iconMoon, { opacity: 1, rotate: 0, duration: .45, delay: .08, ease: 'back.out(2.2)' });
+    gsap.fromTo(themeToggle, { scale: .8 }, { scale: 1, duration: .4, ease: 'back.out(3)' });
+  });
+
+  /* ---------- tactile clicks: check buttons + plus rows ---------- */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mini-btn, .row .plus');
+    if (!btn) return;
+    if (!skipGSAP) spawnRipple(btn);
+    if (btn.classList.contains('mini-btn')){
+      btn.classList.toggle('done');
+      const nowDone = btn.classList.contains('done');
+      btn.setAttribute('aria-pressed', nowDone ? 'true' : 'false');
+      if (!btn.getAttribute('title')){
+        const lbl = describe(btn);
+        if (lbl) btn.setAttribute('aria-label', lbl);
+      }
+      if (!REDUCE) gsap.fromTo(btn, { scale: .7 }, { scale: 1, duration: .45, ease: 'back.out(3)' });
+    } else if (btn.classList.contains('plus')){
+      if (!REDUCE) gsap.fromTo(btn, { scale: .7, rotate: -90 }, { scale: 1, rotate: 0, duration: .5, ease: 'back.out(3)' });
+    }
+  });
+
+
+  if (!REDUCE && !skipGSAP){
+    document.querySelectorAll('.tilt').forEach(el => {
+      gsap.set(el, { transformPerspective: 700 });
+      const rotX = gsap.quickTo(el, 'rotationX', { duration: .5, ease: 'power3' });
+      const rotY = gsap.quickTo(el, 'rotationY', { duration: .5, ease: 'power3' });
+      const liftY = gsap.quickTo(el, 'y', { duration: .5, ease: 'power3' });
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - .5;
+        const py = (e.clientY - r.top) / r.height - .5;
+        rotY(px * 10);
+        rotX(py * -10);
+        liftY(-3);
+      });
+      el.addEventListener('mouseleave', () => { rotX(0); rotY(0); liftY(0); });
+    });
+  }
+
+  /* ---------- cursor spotlight ---------- */
+  if (!REDUCE && !skipGSAP){
+    const spotlight = document.getElementById('spotlight');
+    const glow = document.getElementById('spotlightGlow');
+    const moveX = gsap.quickTo(glow, 'x', { duration: .7, ease: 'power3' });
+    const moveY = gsap.quickTo(glow, 'y', { duration: .7, ease: 'power3' });
+    let primed = false;
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
+      if (!primed){
+        // jump to the cursor on first sight instead of sliding in from 0,0
+        gsap.set(glow, { x: e.clientX, y: e.clientY });
+        primed = true;
+      }
+      moveX(e.clientX);
+      moveY(e.clientY);
+      spotlight.classList.add('on');
+    }, { passive: true });
+    // only hide when the pointer genuinely leaves the window
+    document.addEventListener('pointerout', (e) => {
+      if (!e.relatedTarget && !e.toElement) spotlight.classList.remove('on');
+    });
+    window.addEventListener('blur', () => spotlight.classList.remove('on'));
+  }
+
+  /* ---------- scroll-triggered reveal for anything the boot sequence missed ---------- */
+  let revealTriggers = [];
+  function setupScrollReveals(){
+    if (REDUCE || skipGSAP || !window.ScrollTrigger) return;
+    revealTriggers.forEach(t => t.kill());
+    revealTriggers = [];
+    document.querySelectorAll('.view').forEach(view => {
+      if (!view.classList.contains('active')) return;
+      view.querySelectorAll('.reveal').forEach(el => {
+        revealTriggers.push(ScrollTrigger.create({
+          trigger: el,
+          start: 'top 92%',
+          onEnter(){ if (gsap.getProperty(el, 'opacity') < 1) gsap.to(el, { opacity: 1, y: 0, duration: .6, ease: 'power3.out' }); }
+        }));
+      });
+    });
+  }
+
+  /* ---------- accessibility: make div-based controls real controls ---------- */
+  // Icon-only controls take their name from the task they sit next to.
+  function describe(el){
+    const item = el.closest('.task, .row');
+    const subject = item ? (item.querySelector('.task-label, .row-label')?.textContent || '').trim().replace(/\s+/g, ' ') : '';
+    const named = (verb) => subject ? verb + ' \u201c' + subject + '\u201d' : verb;
+    if (el.classList.contains('mini-btn')){
+      const isCal = !!el.querySelector('rect[x="3"]');
+      if (isCal) return named('Add a reminder for');
+      return named(el.classList.contains('done') ? 'Mark incomplete:' : 'Mark complete:');
+    }
+    if (el.classList.contains('plus')) return named('Start');
+    if (el.classList.contains('more')) return named('More options for');
+    return '';
+  }
+
+  function upgradeControls(){
+    const sel = '.side-btn, .icon-btn, .mini-btn, .row .plus, .row .more, .chip, .comm-view-all, .svc-link, .profile-btn';
+    document.querySelectorAll(sel).forEach(el => {
+      if (el.tagName === 'BUTTON' || el.dataset.a11y) return;
+      el.dataset.a11y = '1';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      if (!el.getAttribute('aria-label')){
+        const label = el.getAttribute('title') || el.textContent.trim() || describe(el);
+        if (label) el.setAttribute('aria-label', label);
+      }
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); el.click(); }
+      });
+    });
+    document.querySelectorAll('#sidebarRail .side-btn').forEach(el => {
+      if (el.id !== 'themeToggle' && !el.hasAttribute('aria-pressed')) el.setAttribute('aria-pressed','false');
+    });
+    document.querySelectorAll('.mini-btn').forEach(el => {
+      el.setAttribute('aria-pressed', el.classList.contains('done') ? 'true' : 'false');
+    });
+    const loader = document.getElementById('loader');
+    if (loader){ loader.setAttribute('role','status'); loader.setAttribute('aria-label','Loading Atlas'); }
+    document.getElementById('spotlight')?.setAttribute('aria-hidden','true');
+    document.querySelectorAll('.pillnav button').forEach(b => {
+      b.setAttribute('aria-current', b.classList.contains('active') ? 'page' : 'false');
+    });
+  }
+  upgradeControls();
+
+  /* ---------- boot sequence ---------- */
+  function boot(){
+    const loader = document.getElementById('loader');
+    const journey = document.getElementById('view-journey');
+
+    if (skipGSAP){ initFallback(); return; }
+
+    if (REDUCE){
+      if (loader) loader.style.display = 'none';
+      revealView(journey);
+      runHomeExtras(document.getElementById('view-home'));
+      setupScrollReveals();
+      return;
+    }
+
+    gsap.set(['#sidebarRail .side-btn', '.brand', '.pillnav', '.top-right'], { opacity: 0, y: -8 });
+
+    const tl = gsap.timeline({
+      onComplete(){
+        setupScrollReveals();
+      }
+    });
+    tl.to('#loader .loader-bar i', { xPercent: 150, duration: .7, ease: 'power1.inOut' })
+      .to('#loader .loader-mark', { scale: 1.06, duration: .35, ease: 'power2.out' }, '-=.5')
+      .to('#loader .loader-mark', { scale: 1, duration: .3, ease: 'power2.inOut' })
+      .to('#loader', { opacity: 0, duration: .45, ease: 'power2.inOut', onComplete(){ loader.style.display = 'none'; } })
+      .to(['.brand', '.pillnav', '.top-right'], { opacity: 1, y: 0, duration: .5, ease: 'power3.out', stagger: .06 }, '-=.15')
+      .to('#sidebarRail .side-btn', { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)', stagger: .05 }, '-=.4')
+      .add(() => { revealView(journey); }, '-=.25');
+  }
+
+  if (document.readyState === 'loading'){
+    window.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+</body>
+</html>
