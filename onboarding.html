@@ -290,7 +290,13 @@
   }
 
   function startGenerating(){
-    setTimeout(() => { location.href = 'index.html'; }, 1900);
+    setTimeout(() => {
+      // static-prototype stand-in for the real app's user.onboarded — see
+      // shared/atlas-auth-gate.js. Persists across logout/login on purpose:
+      // this is a profile fact, not a session fact.
+      try { localStorage.setItem('atlas-onboarded', '1'); } catch (e) {}
+      location.href = 'index.html';
+    }, 1900);
   }
 
   backBtn.addEventListener('click', () => { if (current > 0) goTo(current - 1); });

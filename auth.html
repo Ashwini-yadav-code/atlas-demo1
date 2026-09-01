@@ -267,6 +267,11 @@
 
   let mode = new URLSearchParams(location.search).get('mode') === 'signup' ? 'signup' : 'login';
   let returningDismissed = false;
+  // true only while the user is in the middle of the "Continue as Harman"
+  // shortcut — Harman is the fully-established demo persona (matches the
+  // real app's seeded, already-onboarded account), so that path always
+  // skips the quiz regardless of this browser's actual onboarding state.
+  let isHarmanShortcut = false;
 
   function setMode(next){
     mode = next;
@@ -307,11 +312,13 @@
     stepForm.classList.add('al-active');
     setMode(mode); // recompute the returning-banner visibility for this step
     stopResendCountdown();
+    isHarmanShortcut = false;
   });
 
   /* ---------- identity form ---------- */
   document.getElementById('identityForm').addEventListener('submit', (e) => {
     e.preventDefault();
+    isHarmanShortcut = false;
     const value = emailInput.value.trim();
     if (!value || !value.includes('@')){
       emailHelp.textContent = 'Enter a valid email address.';
@@ -325,6 +332,7 @@
   });
 
   document.getElementById('continueAsHarman').addEventListener('click', () => {
+    isHarmanShortcut = true;
     goToCode('harman@email.com');
   });
 
@@ -398,10 +406,27 @@
 
   /* ---------- verify + Google: same functional contract as before —
      "000000" demonstrates the wrong-code error state, everything else
-     succeeds; both set the session flag shared/atlas-auth-gate.js checks,
-     then redirect (signup -> onboarding.html, login -> index.html) ---------- */
-  function markSignedIn(){
-    try { localStorage.setItem('atlas-session', '1'); } catch (e) {}
+     succeeds and sets the session flag shared/atlas-auth-gate.js checks.
+
+     Where it lands next does NOT depend on which tab (login/signup) was
+     active — that was the actual bug being fixed here: a brand-new
+     visitor redirected in from the auth gate lands on the default "Log
+     in" tab with no ?mode= param, so gating the destination on `mode`
+     meant they could reach index.html having never seen the quiz at
+     all. It depends on whether *this browser* has ever finished
+     onboarding (same source of truth the shared gate script itself
+     checks), so the gate can't immediately bounce them right back. The
+     Harman shortcut is the one deliberate exception: it's a stand-in for
+     the real app's fully-onboarded seeded account, so it always marks
+     onboarded and skips straight to the portal. */
+  function completeSignIn(){
+    try {
+      localStorage.setItem('atlas-session', '1');
+      if (isHarmanShortcut) localStorage.setItem('atlas-onboarded', '1');
+    } catch (e) {}
+    let onboarded = false;
+    try { onboarded = localStorage.getItem('atlas-onboarded') === '1'; } catch (e) {}
+    location.href = onboarded ? 'index.html' : 'onboarding.html';
   }
 
   verifyBtn.addEventListener('click', () => {
@@ -419,20 +444,14 @@
     verifyBtn.disabled = true;
     verifyBtn.textContent = 'Verifying…';
     stopResendCountdown();
-    setTimeout(() => {
-      markSignedIn();
-      location.href = mode === 'signup' ? 'onboarding.html' : 'index.html';
-    }, 600);
+    setTimeout(completeSignIn, 600);
   });
 
   const googleBtn = document.getElementById('googleBtn');
   googleBtn.addEventListener('click', () => {
     googleBtn.disabled = true;
     document.getElementById('googleLabel').textContent = 'Signing in…';
-    setTimeout(() => {
-      markSignedIn();
-      location.href = mode === 'signup' ? 'onboarding.html' : 'index.html';
-    }, 600);
+    setTimeout(completeSignIn, 600);
   });
 })();
 </script>
