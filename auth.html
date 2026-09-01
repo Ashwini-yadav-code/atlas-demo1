@@ -282,6 +282,7 @@
     verifyBtn.insertAdjacentHTML('afterbegin', '<span class="btn-spinner"></span>');
     const mode = tabs.querySelector('button.active').dataset.mode;
     setTimeout(() => {
+      markSignedIn();
       location.href = mode === 'signup' ? 'onboarding.html' : 'index.html';
     }, 700);
   });
@@ -290,8 +291,16 @@
     this.disabled = true;
     this.querySelector('.btn-label').textContent = 'Signing in…';
     const mode = tabs.querySelector('button.active').dataset.mode;
-    setTimeout(() => { location.href = mode === 'signup' ? 'onboarding.html' : 'index.html'; }, 600);
+    setTimeout(() => {
+      markSignedIn();
+      location.href = mode === 'signup' ? 'onboarding.html' : 'index.html';
+    }, 600);
   });
+
+  // static-prototype stand-in for a real session — see shared/atlas-auth-gate.js
+  function markSignedIn(){
+    try { localStorage.setItem('atlas-session', '1'); } catch (e) {}
+  }
 
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', () => AtlasUI.boot());

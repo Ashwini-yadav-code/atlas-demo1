@@ -2,6 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
+<script src="shared/atlas-auth-gate.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile &amp; settings — Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,7 +174,7 @@
               <button type="submit" class="btn btn-primary">Save changes</button>
               <button type="button" class="btn btn-secondary">Cancel</button>
               <span class="pf-save-note" id="saveNote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Saved</span>
-              <button type="button" class="btn btn-destructive" style="margin-left:auto;">Log out</button>
+              <button type="button" class="btn btn-destructive" id="logoutBtn" style="margin-left:auto;">Log out</button>
             </div>
           </form>
         </div>
@@ -238,6 +239,11 @@
   document.getElementById('backBtn').addEventListener('click', () => {
     if (document.referrer && document.referrer.includes(location.host)) history.back();
     else location.href = 'index.html';
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    try { localStorage.removeItem('atlas-session'); } catch (e) {}
+    location.href = 'auth.html';
   });
 
   updateRing(false);
