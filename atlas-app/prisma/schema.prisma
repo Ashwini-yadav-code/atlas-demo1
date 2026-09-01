@@ -1,0 +1,341 @@
+// Atlas — data model (atlas-build-checklist.md §3)
+//
+// Local dev runs on SQLite (no Postgres/Docker available in this sandbox).
+// Nothing here is SQLite-specific — swapping `provider = "sqlite"` below for
+// `"postgresql"` and pointing DATABASE_URL at a real instance is the only
+// change needed to run this in production, per CLAUDE.md's stack.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------- auth (NextAuth / Auth.js Prisma adapter shape) ----------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/// One-time codes for the email/phone OTP sign-in flow (checklist §3: "Auth
+/// service ... OTP reset"). Real delivery needs an email/SMS provider wired
+/// into `sendOtp()` — see src/lib/otp.ts.
+model OtpCode {
+  id          String    @id @default(cuid())
+  identifier  String // email or phone
+  code        String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([identifier])
+}
+
+// ---------- people ----------
+
+enum Role {
+  STUDENT
+  ADVISOR
+  ADMIN
+}
+
+enum JourneyStage {
+  SHORTLIST
+  APPLICATIONS
+  VISA_DOCS
+  PRE_DEPARTURE
+  ARRIVAL
+}
+
+enum QualificationLevel {
+  TWELFTH_GRADE
+  BACHELORS
+  MASTERS
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  phone         String?   @unique
+  name          String?
+  image         String?
+  role          Role      @default(STUDENT)
+  emailVerified DateTime?
+
+  // academic / quiz profile (checklist §3: "academic history, test scores, budget")
+  homeCity        String?
+  qualification   QualificationLevel?
+  percentage      String?
+  englishTest     String?
+  englishScore    String?
+  courseInterest  String?
+  budgetRange     String?
+  preferredCities String? // comma-separated; SQLite has no native string[]
+
+  currentStage JourneyStage @default(SHORTLIST)
+  onboarded    Boolean      @default(false)
+
+  accounts      Account[]
+  sessions      Session[]
+  applications  Application[]
+  tasks         Task[]
+  notifications Notification[]
+  advisorLinks  StudentAdvisor[]
+  threads       MessageThread[]
+  messages      Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Advisors are staff, not necessarily platform logins in this MVP — kept as
+/// their own entity per checklist §3 ("Advisors/team + student-advisor
+/// assignment") rather than overloading User with a staff role.
+model Advisor {
+  id       String @id @default(cuid())
+  name     String
+  jobTitle String // "Application advisor", "Visa specialist", ...
+  image    String?
+
+  students StudentAdvisor[]
+  threads  MessageThread[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model StudentAdvisor {
+  id        String  @id @default(cuid())
+  studentId String
+  advisorId String
+  student   User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  advisor   Advisor @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, advisorId])
+}
+
+// ---------- catalogue ----------
+
+model University {
+  id       String   @id @default(cuid())
+  slug     String   @unique
+  name     String
+  city     String
+  aboutCity String?
+  courses  Course[]
+}
+
+model Course {
+  id                 String     @id @default(cuid())
+  universityId       String
+  university         University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  name               String
+  level              String // "MSc", "BSc", ...
+  durationMonths     Int        @default(12)
+  tuitionPerYear     Int // minor units of the currency, e.g. GBP pounds
+  currency           String     @default("GBP")
+  startDate          String
+  applicationDeadline DateTime
+  isRollingDeadline  Boolean    @default(false)
+  entryRequirement   String
+  ieltsRequirement   String
+  aboutCourse        String?
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------- applications & tasks ----------
+
+enum ApplicationStatus {
+  NOT_APPLIED
+  SHORTLISTED
+  APPLIED
+  OFFER
+  ACCEPTED
+  REJECTED
+}
+
+model Application {
+  id         String            @id @default(cuid())
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status     ApplicationStatus @default(SHORTLISTED)
+  matchScore Int // 0-100, from the matching engine
+
+  appliedAt  DateTime?
+  decisionAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+}
+
+/// Tick-only checklist items — no file uploads, per the free-tier rule.
+/// Covers both the Journey board's per-stage columns and checklist.html.
+model Task {
+  id     String       @id @default(cuid())
+  userId String
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage  JourneyStage
+  label  String
+  dueAt  DateTime?
+  done   Boolean      @default(false)
+  note   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------- services ----------
+
+enum ServiceCategory {
+  BANK
+  SIM
+  HOUSING
+  FOREX
+  INSURANCE
+  LOANS
+}
+
+model ServicePartner {
+  id           String          @id @default(cuid())
+  category     ServiceCategory
+  name         String
+  blurb        String
+  stat1Label   String
+  stat1Value   String
+  stat2Label   String
+  stat2Value   String
+  isPriority   Boolean         @default(false)
+  priorityWhy  String?
+  websiteUrl   String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------- community ----------
+
+enum CommunityType {
+  JOB
+  EVENT
+  GUIDE
+}
+
+enum PublishState {
+  DRAFT
+  PUBLISHED
+}
+
+model CommunityContent {
+  id            String        @id @default(cuid())
+  type          CommunityType
+  title         String
+  eyebrow       String
+  body          String // paragraphs joined by \n\n
+  status        PublishState  @default(DRAFT)
+
+  // job-specific
+  requirements  String? // one per line
+
+  // event-specific
+  eventDate     DateTime?
+  location      String?
+  capacity      Int?
+  going         Int?
+
+  // guide-specific
+  authorName    String?
+  authorRole    String?
+  authorImage   String?
+  readMinutes   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------- messaging ----------
+
+model MessageThread {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  advisorId String
+  advisor   Advisor  @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime @default(now())
+
+  @@unique([userId, advisorId])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  body      String
+  fromUserId   String?
+  fromUser     User?      @relation(fields: [fromUserId], references: [id])
+  fromAdvisorId String?
+  fromAdvisor   Advisor?  @relation(fields: [fromAdvisorId], references: [id])
+  readAt    DateTime?
+  createdAt DateTime      @default(now())
+}
+
+// ---------- notifications ----------
+
+enum NotificationKind {
+  DEADLINE
+  MESSAGE
+  OFFER
+  EVENT
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}

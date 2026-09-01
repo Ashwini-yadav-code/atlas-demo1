@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The matching quiz — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  body{ min-height:100vh; }
+  .ob-nav{ display:flex; align-items:center; padding:22px 32px; }
+  .ob-nav .brand{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:16px; display:flex; align-items:center; gap:9px; }
+  .ob-nav .exit{ margin-left:auto; font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none; }
+  .ob-nav .exit:hover{ color:var(--ink); }
+  .ob-nav .icon-btn{ margin-left:14px; }
+
+  .ob-wrap{ max-width:640px; margin:0 auto; padding:12px 24px 60px; }
+  .ob-progress{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .ob-progress span{ font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; }
+  .ob-stepper .stepper{ margin-top:8px; padding:0 4px 26px; }
+  .ob-stepper .step-lbl{ font-size:10.5px; }
+
+  .ob-panel{ padding:34px 34px 22px; min-height:340px; display:flex; flex-direction:column; }
+  .ob-q{ display:none; flex:1; }
+  .ob-q.active{ display:flex; flex-direction:column; }
+  .ob-q h2{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:23px; letter-spacing:-.02em; }
+  .ob-q .ob-sub{ font-size:13.5px; color:var(--ink-soft); margin-top:6px; margin-bottom:24px; }
+
+  .ob-chip-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .ob-chip{
+    appearance:none; border:1px solid var(--line); background:var(--card);
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink);
+    padding:11px 18px; border-radius:var(--r-md); cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, color .15s ease;
+    display:flex; align-items:center; gap:8px;
+  }
+  .ob-chip:hover{ border-color:var(--line-strong); }
+  .ob-chip.active{ background:var(--accent); color:var(--panel); border-color:var(--accent); }
+  .ob-chip .tick{ width:14px; height:14px; display:none; }
+  .ob-chip.active .tick{ display:block; }
+
+  .ob-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:560px){ .ob-row{ grid-template-columns:1fr; } }
+
+  .ob-foot{
+    display:flex; align-items:center; justify-content:space-between;
+    border-top:1px solid var(--line); margin-top:26px; padding-top:20px;
+  }
+  .ob-foot .step-count{ font-size:12.5px; color:var(--ink-faint); }
+
+  .ob-review-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--line); }
+  .ob-review-row:last-child{ border-bottom:none; }
+  .ob-review-row .k{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+  .ob-review-row .v{ font-size:13.5px; color:var(--ink); font-weight:600; text-align:right; }
+  .ob-review-row a{ font-size:12px; font-weight:700; color:var(--blue); margin-left:10px; cursor:pointer; }
+
+  /* generating shortlist */
+  .ob-generating{ text-align:center; padding:20px 10px; }
+  .ob-generating h2{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:22px; margin-bottom:8px; }
+  .ob-generating p{ font-size:13.5px; color:var(--ink-soft); margin-bottom:26px; }
+  .ob-skel-row{ display:flex; flex-direction:column; gap:12px; }
+  .ob-skel-row .skeleton{ height:64px; }
+  .ob-skel-row .skeleton:nth-child(2){ width:92%; }
+  .ob-skel-row .skeleton:nth-child(3){ width:82%; }
+</style>
+</head>
+<body>
+
+  <div id="loader">
+    <div class="loader-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg>
+    </div>
+    <div class="loader-bar"><i></i></div>
+  </div>
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <nav class="ob-nav reveal">
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+      atlas
+    </div>
+    <a class="exit" href="landing.html">Save &amp; exit</a>
+    <div class="icon-btn" id="themeToggle" title="Toggle theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </div>
+  </nav>
+
+  <div class="ob-wrap">
+    <div class="ob-stepper reveal">
+      <div class="ob-progress">
+        <span id="obStepLabel">Step 1 of 5</span>
+        <span id="obStepPct">20%</span>
+      </div>
+      <div class="stepper" id="obStepper">
+        <div class="step now" data-step="0"><div class="step-dot">1</div><div class="step-lbl">Course</div></div>
+        <div class="step locked" data-step="1"><div class="step-line"></div><div class="step-dot">2</div><div class="step-lbl">Destination</div></div>
+        <div class="step locked" data-step="2"><div class="step-line"></div><div class="step-dot">3</div><div class="step-lbl">Budget</div></div>
+        <div class="step locked" data-step="3"><div class="step-line"></div><div class="step-dot">4</div><div class="step-lbl">Profile</div></div>
+        <div class="step locked" data-step="4"><div class="step-line"></div><div class="step-dot">5</div><div class="step-lbl">Review</div></div>
+      </div>
+    </div>
+
+    <div class="card ob-panel reveal" id="obPanel">
+
+      <!-- Q1: course interest -->
+      <div class="ob-q active" data-q="0">
+        <h2>What do you want to study?</h2>
+        <p class="ob-sub">Pick the closest match — you can refine it later.</p>
+        <div class="ob-chip-grid" data-group="course" data-single="true">
+          <button class="ob-chip" data-val="Computer Science">Computer Science</button>
+          <button class="ob-chip" data-val="Data Science">Data Science</button>
+          <button class="ob-chip" data-val="Business & Management">Business &amp; Management</button>
+          <button class="ob-chip" data-val="Engineering">Engineering</button>
+          <button class="ob-chip" data-val="Law">Law</button>
+          <button class="ob-chip" data-val="Design">Design</button>
+          <button class="ob-chip" data-val="Public Health">Public Health</button>
+          <button class="ob-chip" data-val="Other">Other</button>
+        </div>
+      </div>
+
+      <!-- Q2: destination -->
+      <div class="ob-q" data-q="1">
+        <h2>Where in the UK?</h2>
+        <p class="ob-sub">Pick as many cities as you'd consider — or leave blank if you're flexible.</p>
+        <div class="ob-chip-grid" data-group="cities">
+          <button class="ob-chip" data-val="London"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>London</button>
+          <button class="ob-chip" data-val="Manchester"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Manchester</button>
+          <button class="ob-chip" data-val="Leeds"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Leeds</button>
+          <button class="ob-chip" data-val="Edinburgh"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Edinburgh</button>
+          <button class="ob-chip" data-val="Birmingham"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Birmingham</button>
+          <button class="ob-chip" data-val="Glasgow"><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Glasgow</button>
+        </div>
+      </div>
+
+      <!-- Q3: budget -->
+      <div class="ob-q" data-q="2">
+        <h2>What's your yearly budget?</h2>
+        <p class="ob-sub">Tuition + living costs, in GBP. A rough figure is fine.</p>
+        <div class="ob-chip-grid" data-group="budget" data-single="true">
+          <button class="ob-chip" data-val="Under £15k">Under £15k</button>
+          <button class="ob-chip" data-val="£15k – £20k">£15k – £20k</button>
+          <button class="ob-chip" data-val="£20k – £25k">£20k – £25k</button>
+          <button class="ob-chip" data-val="£25k – £30k">£25k – £30k</button>
+          <button class="ob-chip" data-val="£30k+">£30k+</button>
+        </div>
+      </div>
+
+      <!-- Q4: academic profile -->
+      <div class="ob-q" data-q="3">
+        <h2>Your academic profile</h2>
+        <p class="ob-sub">This is what we match your shortlist against.</p>
+        <div class="ob-chip-grid" data-group="level" data-single="true" style="margin-bottom:20px;">
+          <button class="ob-chip" data-val="12th grade">12th grade</button>
+          <button class="ob-chip" data-val="Bachelor's">Bachelor's degree</button>
+          <button class="ob-chip" data-val="Master's">Master's degree</button>
+        </div>
+        <div class="ob-row">
+          <div class="field">
+            <label class="field-label" for="obPercent">Overall percentage / GPA</label>
+            <input class="field-input" id="obPercent" type="text" placeholder="e.g. 82% or 3.6 GPA">
+          </div>
+          <div class="field">
+            <label class="field-label" for="obScore">English test score <span style="font-weight:400; color:var(--ink-faint);">(optional)</span></label>
+            <input class="field-input" id="obScore" type="text" placeholder="e.g. IELTS 7.0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Q5: review -->
+      <div class="ob-q" data-q="4">
+        <h2>Check your answers</h2>
+        <p class="ob-sub">This is what we'll match your shortlist against.</p>
+        <div id="obReview"></div>
+      </div>
+
+      <!-- generating -->
+      <div class="ob-q" data-q="5">
+        <div class="ob-generating">
+          <h2>Building your shortlist…</h2>
+          <p>Matching against 120+ vetted UK courses.</p>
+          <div class="ob-skel-row">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-foot" id="obFoot">
+        <button class="btn btn-secondary" id="obBack">Back</button>
+        <span class="step-count" id="obCount">1 / 5</span>
+        <button class="btn btn-primary" id="obNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/atlas-shared.js"></script>
+<script>
+(function(){
+  const answers = { course: null, cities: [], budget: null, level: null, percent: '', score: '' };
+  const steps = document.querySelectorAll('.ob-q');
+  const stepDots = document.querySelectorAll('#obStepper .step');
+  const stepLabel = document.getElementById('obStepLabel');
+  const stepPct = document.getElementById('obStepPct');
+  const foot = document.getElementById('obFoot');
+  const backBtn = document.getElementById('obBack');
+  const nextBtn = document.getElementById('obNext');
+  const count = document.getElementById('obCount');
+  const review = document.getElementById('obReview');
+  const TOTAL = 5; // question groups; step index 5 is the generating transition
+  let current = 0;
+
+  document.querySelectorAll('.ob-chip-grid').forEach(grid => {
+    const group = grid.dataset.group;
+    const single = grid.dataset.single === 'true';
+    grid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.ob-chip');
+      if (!chip) return;
+      if (!AtlasUI.skipGSAP && !AtlasUI.REDUCE) AtlasUI.spawnRipple(chip);
+      if (single){
+        grid.querySelectorAll('.ob-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        answers[group] = chip.dataset.val;
+      } else {
+        chip.classList.toggle('active');
+        answers[group] = [...grid.querySelectorAll('.ob-chip.active')].map(c => c.dataset.val);
+      }
+    });
+  });
+
+  function updateStepper(){
+    const clamped = Math.min(current, TOTAL - 1);
+    stepDots.forEach((dot, i) => {
+      dot.classList.remove('done', 'now', 'locked');
+      if (i < clamped) dot.classList.add('done');
+      else if (i === clamped) dot.classList.add('now');
+      else dot.classList.add('locked');
+    });
+    stepLabel.textContent = current >= TOTAL ? 'Almost there' : `Step ${clamped + 1} of ${TOTAL}`;
+    stepPct.textContent = Math.round((Math.min(current + 1, TOTAL) / TOTAL) * 100) + '%';
+    count.textContent = `${clamped + 1} / ${TOTAL}`;
+  }
+
+  function renderReview(){
+    const rows = [
+      ['Course', answers.course || '—', 0],
+      ['Cities', answers.cities.length ? answers.cities.join(', ') : 'Flexible', 1],
+      ['Budget', answers.budget || '—', 2],
+      ['Level', answers.level || '—', 3],
+      ['Percentage / GPA', document.getElementById('obPercent').value || '—', 3],
+    ];
+    review.innerHTML = rows.map(([k, v, jump]) =>
+      `<div class="ob-review-row"><span class="k">${k}</span><span class="v">${v}<a data-jump="${jump}">Edit</a></span></div>`
+    ).join('');
+    review.querySelectorAll('[data-jump]').forEach(a => {
+      a.addEventListener('click', () => goTo(+a.dataset.jump));
+    });
+  }
+
+  function validateCurrent(){
+    if (current === 0 && !answers.course){ shake(); return false; }
+    if (current === 2 && !answers.budget){ shake(); return false; }
+    if (current === 3 && !answers.level){ shake(); return false; }
+    return true;
+  }
+  function shake(){
+    const active = document.querySelector('.ob-q.active .ob-chip-grid');
+    if (!active || AtlasUI.skipGSAP || AtlasUI.REDUCE) return;
+    gsap.fromTo(active, { x: -6 }, { x: 0, duration: .4, ease: 'elastic.out(1, .4)' });
+  }
+
+  function goTo(idx){
+    steps.forEach(s => s.classList.toggle('active', +s.dataset.q === idx));
+    current = idx;
+    updateStepper();
+    if (idx === TOTAL) { foot.style.display = 'none'; return void startGenerating(); }
+    foot.style.display = '';
+    backBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
+    nextBtn.querySelector('.btn-label')?.remove();
+    nextBtn.textContent = idx === TOTAL - 1 ? 'Get my shortlist' : 'Next';
+    if (idx === TOTAL - 1) renderReview();
+    AtlasUI.revealNow(document.querySelector(`.ob-q[data-q="${idx}"]`).querySelectorAll('.reveal'));
+  }
+
+  function startGenerating(){
+    setTimeout(() => { location.href = 'index.html'; }, 1900);
+  }
+
+  backBtn.addEventListener('click', () => { if (current > 0) goTo(current - 1); });
+  nextBtn.addEventListener('click', () => {
+    if (current === 3){ answers.percent = document.getElementById('obPercent').value; answers.score = document.getElementById('obScore').value; }
+    if (!validateCurrent()) return;
+    goTo(current + 1);
+  });
+
+  updateStepper();
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot());
+  } else {
+    AtlasUI.boot();
+  }
+})();
+</script>
+</body>
+</html>

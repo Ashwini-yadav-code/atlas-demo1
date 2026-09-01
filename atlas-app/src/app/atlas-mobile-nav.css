@@ -1,0 +1,76 @@
+/* ===========================================================
+   Mobile navigation pattern — ux-spec.md §4. Ported from the same
+   block added to the static prototype's index.html (not yet folded
+   into shared/atlas-extended.css there, so duplicated here rather
+   than risking a re-edit of an already-verified file).
+   Nothing here fires above 620px — desktop is unchanged.
+   =========================================================== */
+
+.pillnav .nav-icon{ display:none; }
+
+/* the static prototype's pillnav is <button>-based; this app uses <Link>
+   (renders <a>) for real routing, so the base .pillnav button rules from
+   atlas-design-system.css need an .pillnav a twin at every width, not just
+   mobile — this covers desktop too. */
+.pillnav a{
+  appearance:none; border:none; background:transparent; text-decoration:none;
+  font-family:'Montserrat', sans-serif; font-size:13.5px; font-weight:600;
+  color:var(--ink-soft); padding:9px 18px; border-radius:999px; cursor:pointer;
+  transition:background .18s ease, color .18s ease; white-space:nowrap;
+}
+.pillnav a.active{ background:var(--accent); color:var(--panel); }
+.pillnav a:not(.active):hover{ color:var(--ink); }
+
+.top-right{ position:relative; }
+.account-menu{
+  display:none; position:absolute; top:calc(100% + 10px); right:0;
+  min-width:220px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-card-hover);
+  padding:8px; z-index:15;
+}
+.account-menu.on{ display:block; }
+.account-menu-item{
+  display:flex; align-items:center; gap:12px; padding:11px 12px;
+  border-radius:12px; font-size:13.5px; font-weight:600; color:var(--ink);
+  cursor:pointer; min-height:44px; background:none; border:none; width:100%; text-align:left;
+}
+.account-menu-item:hover{ background:var(--panel); }
+.account-menu-item svg{ width:17px; height:17px; color:var(--ink-soft); flex:none; }
+.account-menu-sep{ height:1px; background:var(--line); margin:6px 4px; }
+
+.j-subtabs{ display:none; gap:8px; overflow-x:auto; margin-bottom:14px; }
+
+@media (max-width:620px){
+  .sidebar{ display:none; }
+  .app{ flex-direction:column; }
+  .main{ padding-bottom:78px; }
+
+  /* .topbar and .view share z-index:2 as siblings in the base stylesheet;
+     bumping .topbar here is what keeps the fixed pillnav on top — see the
+     longer note on this exact rule in the static prototype's index.html. */
+  .topbar{ flex-wrap:nowrap; padding:14px 16px; gap:10px; z-index:11; }
+  .icon-btn{ width:44px; height:44px; }
+  .profile-btn{ padding:5px; margin:-5px; }
+
+  .pillnav{
+    position:fixed; left:0; right:0; bottom:0; z-index:9;
+    width:auto; background:var(--card); border:none; border-top:1px solid var(--line);
+    border-radius:0; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    display:flex; justify-content:space-around;
+  }
+  .pillnav a, .pillnav button{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:transparent; color:var(--ink-soft); padding:6px 2px; border-radius:12px;
+    font-size:10.5px; min-height:44px; text-decoration:none;
+  }
+  .pillnav a.active, .pillnav button.active{ background:transparent; color:var(--accent); }
+  .pillnav .nav-icon{ display:block; width:20px; height:20px; }
+
+  .mini-btn{ width:36px; height:36px; }
+  .chip{ min-height:44px; display:inline-flex; align-items:center; }
+
+  .j-subtabs{ display:flex; }
+  .j-board{ grid-template-columns:1fr; }
+  .j-board > .j-col{ display:none; }
+  .j-board > .j-col.active-col{ display:flex; }
+}

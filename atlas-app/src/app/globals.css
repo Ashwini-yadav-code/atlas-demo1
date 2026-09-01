@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* The approved design system, copied verbatim from shared/ in the static
+   prototype repo (same files that back every .html page there) — this is
+   the actual source of truth for every color/radius/shadow/component class
+   used across this app. Not reimplemented as Tailwind utilities: the
+   fidelity risk of a hand-port outweighs the benefit, and CLAUDE.md is
+   explicit that this file's visual language must match exactly. Tailwind
+   is still configured to the same tokens below, for new component code. */
+@import "./atlas-design-system.css";
+@import "./atlas-extended.css";
+@import "./atlas-mobile-nav.css";
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-blue: var(--blue);
+  --color-coral: var(--coral);
+  --color-gold: var(--gold);
+  --color-green: var(--green);
+  --radius-lg: var(--r-lg);
+  --radius-md: var(--r-md);
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Open Sans", -apple-system, sans-serif;
+}
+
+/* body background/font/color are already fully defined by
+   atlas-design-system.css (including the ember radial-gradient) —
+   intentionally not redeclared here, that would flatten it. */

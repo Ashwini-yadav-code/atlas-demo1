@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service partners — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <div class="screen">
+    <div class="app">
+      <nav class="sidebar" id="sidebarRail" aria-label="Tools">
+        <div class="side-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div class="side-btn" title="Messages" onclick="location.href='messaging.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="side-dot"></span></div>
+        <div class="side-btn" title="Document vault" onclick="location.href='checklist.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <div class="side-btn" title="Help &amp; support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg></div>
+        <div class="side-gap"></div>
+        <div class="side-btn" title="Settings" onclick="location.href='profile.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+        <div class="side-btn" id="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+      </nav>
+
+      <div class="main">
+        <div class="topbar">
+          <div class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+            atlas
+          </div>
+          <div class="topbar-back">
+            <div class="back-btn" id="backBtn" role="button" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Back
+            </div>
+            <div class="breadcrumb"><a href="index.html" style="color:inherit; text-decoration:none;">Services</a><span class="sep">/</span><span class="current" id="crumbCat">Foreign exchange</span></div>
+          </div>
+          <div class="top-right">
+            <div class="icon-btn" title="Notifications" onclick="location.href='notifications.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="side-dot"></span></div>
+            <div class="profile-btn" title="Account menu" onclick="location.href='profile.html'">
+              <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="view active" id="detailView">
+          <div class="detail-hero">
+            <div class="svc-icon" id="catIcon"></div>
+            <div>
+              <h1 id="catTitle">Foreign exchange</h1>
+              <div class="meta">
+                <span class="svc-tag" id="catCount">3 partners</span>
+                <span id="catWhy" style="font-size:13px; font-weight:700; color:#8a4b06;"></span>
+              </div>
+            </div>
+          </div>
+
+          <p class="reveal" id="catBlurb" style="font-size:14px; color:var(--ink-soft); line-height:1.6; max-width:70ch; margin-bottom:24px;"></p>
+
+          <div class="focus-card reveal" id="urgentCard" style="display:none;">
+            <div class="focus-count" id="urgentCount">6<small>days left</small></div>
+            <div class="focus-body">
+              <h2 id="urgentHeadline">Needed for your visa stage</h2>
+              <p id="urgentBody"></p>
+            </div>
+            <button type="button" class="focus-cta" id="urgentCta">Compare top pick</button>
+          </div>
+
+          <div class="trust-ribbon reveal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            Every partner below is vetted on our terms — paying more never buys a higher place in this list.
+          </div>
+
+          <div class="card reveal" style="margin-top:22px;">
+            <div class="panel-head"><h3>Compare partners</h3></div>
+            <div id="partnerList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/atlas-shared.js"></script>
+<script>
+(function(){
+  const CATEGORIES = {
+    bank: {
+      title: 'UK bank account',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 9l9-6 9 6"/><path d="M7 13v4M12 13v4M17 13v4"/></svg>',
+      blurb: "Compare student accounts that don't need a UK address on day one — all four accept a CAS letter and BRP as proof of identity for your first 90 days.",
+      partners: [
+        { name: 'Monzo', blurb: 'App-only account, opens before you land with a valid CAS.', stat1: '£0', stat1Lbl: 'Monthly fee', stat2: '15 min', stat2Lbl: 'Setup time' },
+        { name: 'Barclays', blurb: 'Branch network on most UK campuses, in-person account opening.', stat1: '£0', stat1Lbl: 'Monthly fee', stat2: '2–3 days', stat2Lbl: 'Setup time' },
+        { name: 'HSBC', blurb: 'Pre-arrival account opening for students with an offer letter.', stat1: '£0', stat1Lbl: 'Monthly fee', stat2: '5–7 days', stat2Lbl: 'Setup time' },
+        { name: 'Revolut', blurb: 'Multi-currency account, useful for early INR transfers.', stat1: '£0', stat1Lbl: 'Monthly fee', stat2: '10 min', stat2Lbl: 'Setup time' }
+      ]
+    },
+    sim: {
+      title: 'SIM & mobile plan',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>',
+      blurb: 'eSIMs you can activate before you land, plus long-term UK plans once you have an address to register.',
+      partners: [
+        { name: 'giffgaff', blurb: 'No-contract SIM, popular starter plan for students.', stat1: '£10', stat1Lbl: 'From /mo', stat2: 'Any time', stat2Lbl: 'Cancel' },
+        { name: 'Airalo', blurb: 'eSIM you can activate from India before departure.', stat1: '£4.50', stat1Lbl: '1GB/7 days', stat2: 'Instant', stat2Lbl: 'Activation' },
+        { name: 'Three', blurb: 'Student SIM-only plans with EU/international roaming.', stat1: '£12', stat1Lbl: 'From /mo', stat2: '12 mo', stat2Lbl: 'Contract' }
+      ]
+    },
+    housing: {
+      title: 'Housing',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>',
+      blurb: 'Verified student accommodation near your campus, with no agent fees on the Atlas-listed options below.',
+      partners: [
+        { name: 'Unite Students', blurb: 'Purpose-built student halls, most Manchester campuses.', stat1: '£185', stat1Lbl: 'From /wk', stat2: '4.3★', stat2Lbl: 'Rating' },
+        { name: 'CRM Students', blurb: 'Ensuite and studio options, flexible contract lengths.', stat1: '£165', stat1Lbl: 'From /wk', stat2: '4.1★', stat2Lbl: 'Rating' },
+        { name: 'SpareRoom', blurb: 'Verified shared houses near campus, no agency fee.', stat1: '£140', stat1Lbl: 'From /wk', stat2: '3.9★', stat2Lbl: 'Rating' },
+        { name: 'Student.com', blurb: 'Book a room from India before you land, deposit protected.', stat1: '£170', stat1Lbl: 'From /wk', stat2: '4.2★', stat2Lbl: 'Rating' },
+        { name: 'Homes for Students', blurb: 'City-centre studios with bills included.', stat1: '£195', stat1Lbl: 'From /wk', stat2: '4.0★', stat2Lbl: 'Rating' },
+        { name: 'iQ Student Accommodation', blurb: 'Larger halls with gym and study space on site.', stat1: '£210', stat1Lbl: 'From /wk', stat2: '4.4★', stat2Lbl: 'Rating' }
+      ]
+    },
+    forex: {
+      title: 'Foreign exchange',
+      why: 'Proves your financial evidence',
+      urgent: { days: 6, headline: 'Your CAS deadline needs this first', body: 'Financial evidence is due before your CAS number can be issued — send your transfer now so the receipt clears in time.' },
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+      blurb: "Send tuition and living costs at rates better than your bank's — and get a transfer receipt your visa officer will accept as financial evidence.",
+      partners: [
+        { name: 'Wise', blurb: 'Mid-market rate, transparent fee shown before you send.', stat1: '0.4%', stat1Lbl: 'Fee', stat2: '1–2 days', stat2Lbl: 'Transfer time' },
+        { name: 'Western Union', blurb: 'Large transfer limits, widely accepted for CAS evidence.', stat1: '0.9%', stat1Lbl: 'Fee', stat2: 'Same day', stat2Lbl: 'Transfer time' },
+        { name: 'BookMyForex', blurb: 'India-based, doorstep documentation pickup available.', stat1: '0.6%', stat1Lbl: 'Fee', stat2: '1 day', stat2Lbl: 'Transfer time' }
+      ]
+    },
+    insurance: {
+      title: 'Insurance',
+      why: 'Required by your visa conditions',
+      urgent: { days: 6, headline: 'Cover this before your biometrics appointment', body: 'Visa applications are checked for valid cover — sort this before you book your biometrics slot, not after.' },
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>',
+      blurb: 'Health and travel cover that satisfies your visa requirements — most students are also covered by the NHS Immigration Health Surcharge, paid as part of your visa fee.',
+      partners: [
+        { name: 'Endsleigh', blurb: 'Student-specific travel + contents cover, widely used for UK visas.', stat1: '£8', stat1Lbl: 'From /mo', stat2: '4.5★', stat2Lbl: 'Rating' },
+        { name: 'Aviva', blurb: 'Comprehensive travel and belongings cover, annual policy.', stat1: '£11', stat1Lbl: 'From /mo', stat2: '4.3★', stat2Lbl: 'Rating' }
+      ]
+    },
+    loans: {
+      title: 'Student loans',
+      why: 'Accepted as proof of funds',
+      urgent: { days: 12, headline: 'Sanction letters take time — start early', body: "Most lenders take 1–2 weeks to issue a sanction letter, and your visa's financial evidence needs it in hand, not just applied for." },
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>',
+      blurb: "Collateral-free lenders that work with your university's cost of attendance, with sanction letters accepted as visa financial evidence.",
+      partners: [
+        { name: 'Prodigy Finance', blurb: 'Collateral-free, income-share based repayment options.', stat1: '8.9%', stat1Lbl: 'From APR', stat2: '£90k', stat2Lbl: 'Max amount' },
+        { name: 'MPOWER Financing', blurb: 'No collateral or Indian co-signer required.', stat1: '9.9%', stat1Lbl: 'From APR', stat2: '£75k', stat2Lbl: 'Max amount' },
+        { name: 'HDFC Credila', blurb: 'India-based, collateral options for larger sanction amounts.', stat1: '10.5%', stat1Lbl: 'From APR', stat2: '£100k', stat2Lbl: 'Max amount' },
+        { name: 'Avanse', blurb: 'Fast sanction letters, useful ahead of CAS deadlines.', stat1: '10.8%', stat1Lbl: 'From APR', stat2: '£85k', stat2Lbl: 'Max amount' },
+        { name: 'Leap Finance', blurb: 'No-collateral loans built specifically for study-abroad students.', stat1: '11.2%', stat1Lbl: 'From APR', stat2: '£70k', stat2Lbl: 'Max amount' }
+      ]
+    }
+  };
+
+  const params = new URLSearchParams(location.search);
+  const key = CATEGORIES[params.get('cat')] ? params.get('cat') : 'forex';
+  const c = CATEGORIES[key];
+
+  document.title = c.title + ' — Atlas';
+  document.getElementById('crumbCat').textContent = c.title;
+  document.getElementById('catTitle').textContent = c.title;
+  document.getElementById('catIcon').innerHTML = c.icon;
+  document.getElementById('catBlurb').textContent = c.blurb;
+  document.getElementById('catCount').textContent = c.partners.length + ' partner' + (c.partners.length === 1 ? '' : 's');
+  document.getElementById('catWhy').textContent = c.why || '';
+
+  // one focus-card per screen, reserved for the priority categories the
+  // portal's Services view already flags with a .svc-why reason
+  if (c.urgent) {
+    const card = document.getElementById('urgentCard');
+    card.style.display = '';
+    document.getElementById('urgentCount').firstChild.textContent = c.urgent.days;
+    document.getElementById('urgentHeadline').textContent = c.urgent.headline;
+    document.getElementById('urgentBody').textContent = c.urgent.body;
+    document.getElementById('urgentCta').addEventListener('click', () => {
+      document.querySelector('.partner-row')?.scrollIntoView({ behavior: AtlasUI.REDUCE ? 'auto' : 'smooth', block: 'center' });
+    });
+  }
+
+  document.getElementById('partnerList').innerHTML = c.partners.map(p => `
+    <div class="partner-row reveal">
+      <div class="partner-logo">${p.name.slice(0, 2).toUpperCase()}</div>
+      <div class="partner-info"><h5>${p.name}</h5><span>${p.blurb}</span></div>
+      <div class="partner-stats">
+        <div><b>${p.stat1}</b><small>${p.stat1Lbl}</small></div>
+        <div><b>${p.stat2}</b><small>${p.stat2Lbl}</small></div>
+      </div>
+      <button class="btn btn-secondary btn-sm">Compare</button>
+    </div>
+  `).join('');
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (document.referrer && document.referrer.includes(location.host)) history.back();
+    else location.href = 'index.html';
+  });
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' }));
+  } else {
+    AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' });
+  }
+})();
+</script>
+</body>
+</html>

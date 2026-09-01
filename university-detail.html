@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University detail — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  .detail-split{ display:grid; grid-template-columns:1.5fr 1fr; gap:22px; align-items:start; margin-top:26px; }
+  @media (max-width:1080px){ .detail-split{ grid-template-columns:1fr; } }
+  .detail-main-col > * + *{ margin-top:22px; }
+  .side-col > * + *{ margin-top:22px; }
+  .status-card{ padding:22px; }
+  .status-card .stepper{ margin-top:14px; padding:14px 4px 0; }
+  .apply-cta{ margin-top:16px; }
+  .compare-table td, .compare-table th{ white-space:nowrap; }
+  .compare-table .this-row td{ background:var(--blue-soft); }
+  [data-theme="dark"] .compare-table .this-row td{ background:var(--blue-soft); }
+</style>
+</head>
+<body>
+
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <div class="screen">
+    <div class="app">
+      <nav class="sidebar" id="sidebarRail" aria-label="Tools">
+        <div class="side-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div class="side-btn" title="Messages" onclick="location.href='messaging.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="side-dot"></span></div>
+        <div class="side-btn" title="Document vault" onclick="location.href='checklist.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <div class="side-btn" title="Help &amp; support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg></div>
+        <div class="side-gap"></div>
+        <div class="side-btn" title="Settings" onclick="location.href='profile.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+        <div class="side-btn" id="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+      </nav>
+
+      <div class="main">
+        <div class="topbar">
+          <div class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+            atlas
+          </div>
+          <div class="topbar-back">
+            <div class="back-btn" id="backBtn" role="button" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Back
+            </div>
+            <div class="breadcrumb"><a href="index.html" style="color:inherit; text-decoration:none;">Shortlist</a><span class="sep">/</span><span class="current" id="crumbName">University of Manchester</span></div>
+          </div>
+          <div class="top-right">
+            <div class="icon-btn" title="Notifications" onclick="location.href='notifications.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="side-dot"></span></div>
+            <div class="profile-btn" title="Account menu" onclick="location.href='profile.html'">
+              <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="view active" id="detailView">
+          <div class="detail-hero">
+            <div class="svc-icon" style="background:var(--panel);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg></div>
+            <div>
+              <h1 id="uniName">University of Manchester</h1>
+              <div class="meta">
+                <span class="match-pill match-high" id="uniMatch">96% match</span>
+                <span class="status-pill live" id="uniStatus">Offer accepted</span>
+                <span style="font-size:13px; color:var(--ink-soft);" id="uniCourse">MSc Data Science</span>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-secondary" id="shortlistBtn">In your shortlist</button>
+            </div>
+          </div>
+
+          <div class="focus-card reveal" id="focusCard">
+            <div class="focus-count" id="focusCount">3<small id="focusCountLbl">stages done</small></div>
+            <div class="focus-body">
+              <h2 id="focusHeadline">Offer accepted — deposit paid</h2>
+              <p id="focusBody">Everything after arrival stays locked until your visa decision lands. Head to the visa checklist to keep moving.</p>
+            </div>
+            <button type="button" class="focus-cta" id="focusCta">Go to visa checklist</button>
+          </div>
+
+          <div class="fact-grid reveal">
+            <div class="card"><div class="fact-label">Tuition / year</div><div class="fact-value" id="factFees">£28,500</div></div>
+            <div class="card"><div class="fact-label">Duration</div><div class="fact-value" id="factDuration">1 year</div></div>
+            <div class="card"><div class="fact-label">Start date</div><div class="fact-value" id="factStart">Sept 2026</div></div>
+            <div class="card"><div class="fact-label">Apply by</div><div class="fact-value" id="factDeadline">15 Jan 2026</div></div>
+            <div class="card"><div class="fact-label">Entry requirement</div><div class="fact-value" id="factEntry">2:1 Hons</div></div>
+            <div class="card"><div class="fact-label">IELTS</div><div class="fact-value" id="factIelts">6.5 overall</div></div>
+          </div>
+
+          <div class="detail-split">
+            <div class="detail-main-col">
+              <div class="why-match reveal" id="whyMatch">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                <span id="whyMatchText">Matches your Data Science interest, sits inside your £25k–30k budget, and your predicted grade clears the 2:1 requirement.</span>
+              </div>
+
+              <div class="card reveal">
+                <div class="panel-head"><h3>About the course</h3></div>
+                <div class="detail-body" style="padding:0 20px 22px;" id="aboutBody"></div>
+              </div>
+
+              <div class="card reveal">
+                <div class="panel-head"><h3>Compare your shortlist</h3></div>
+                <div class="table-scroll">
+                  <table class="compare-table">
+                    <thead><tr><th>University</th><th>Match</th><th>Tuition/yr</th><th>Deadline</th><th>Status</th></tr></thead>
+                    <tbody id="compareBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="side-col">
+              <div class="card accent-dark status-card reveal">
+                <div class="panel-head" style="padding:0 0 4px;"><h3>Application status</h3></div>
+                <div class="stepper" id="uniStepper">
+                  <div class="step" data-s="applied"><div class="step-dot">1</div><div class="step-lbl">Applied</div></div>
+                  <div class="step" data-s="offer"><div class="step-line"></div><div class="step-dot">2</div><div class="step-lbl">Offer</div></div>
+                  <div class="step" data-s="accepted"><div class="step-line"></div><div class="step-dot">3</div><div class="step-lbl">Accepted</div></div>
+                </div>
+                <button class="btn btn-primary btn-block apply-cta" id="applyCta">Start application</button>
+              </div>
+
+              <div class="card reveal">
+                <div class="panel-head"><h3>Campus &amp; city</h3></div>
+                <div class="detail-body" style="padding:0 20px 20px;" id="cityBody"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="shared/atlas-shared.js"></script>
+<script>
+(function(){
+  const DATA = {
+    manchester: {
+      name: 'University of Manchester', course: 'MSc Data Science', match: 96, matchClass: 'match-high',
+      status: 'accepted', statusLabel: 'Offer accepted',
+      fees: '£28,500', duration: '1 year', start: 'Sept 2026', deadline: '15 Jan 2026', entry: '2:1 Hons', ielts: '6.5 overall',
+      why: 'Matches your Data Science interest, sits inside your £25k–30k budget, and your predicted grade clears the 2:1 requirement.',
+      about: [
+        "This MSc covers statistical modelling, machine learning and large-scale data engineering, with a final-term industry project run alongside a UK employer partner.",
+        "Cohorts are small — around 60 students — and the course is accredited by the Royal Statistical Society, which several student loan and scholarship schemes ask for by name."
+      ],
+      city: [
+        "Manchester is one of the UK's largest student cities, with a large Indian and South Asian student community already established near campus.",
+        "Direct trains to Manchester Airport (25 min) and London (2h10). Typical shared housing near campus runs £550–£750/month."
+      ]
+    },
+    ucl: {
+      name: 'UCL', course: 'MSc Data Science', match: 91, matchClass: 'match-high',
+      status: 'offer', statusLabel: 'Awaiting decision',
+      fees: '£34,650', duration: '1 year', start: 'Sept 2026', deadline: '27 Nov 2025', entry: '2:1 Hons', ielts: '7.0 overall',
+      why: "Strong course fit and your grades clear the bar — but UCL's earlier deadline and higher IELTS requirement make it a stretch on timing, not fit.",
+      about: [
+        "UCL's programme leans heavily on statistical theory and research methods, taught out of the Department of Statistical Science in central London.",
+        "Central London placement links give strong access to fintech and consulting employers, though competition for the cohort's 90 seats is high."
+      ],
+      city: [
+        "London is the most expensive option on your shortlist — budget £900–£1,300/month for shared housing near most campuses.",
+        "Unmatched access to internships, events and the largest South Asian community of any UK city."
+      ]
+    },
+    leeds: {
+      name: 'University of Leeds', course: 'MSc Data Science', match: 84, matchClass: 'match-mid',
+      status: 'not-applied', statusLabel: 'Not yet applied',
+      fees: '£26,750', duration: '1 year', start: 'Sept 2026', deadline: '1 Aug 2026', entry: '2:2 Hons', ielts: '6.0 overall',
+      why: 'Comfortably inside your budget with a lower entry bar than the rest of your shortlist — a strong safety option with a rolling deadline.',
+      about: [
+        "Leeds' MSc focuses on applied data science with modules students can weight toward business analytics or machine learning engineering.",
+        "Rolling admissions mean offers can arrive within 2–3 weeks of applying, the fastest turnaround on your shortlist."
+      ],
+      city: [
+        "Leeds has one of the UK's lowest costs of living among major student cities — shared housing typically runs £450–£600/month.",
+        "A 15-minute walk covers most of campus and the city centre, with direct trains to Manchester (55 min) and London (2h20)."
+      ]
+    },
+    edinburgh: {
+      name: 'University of Edinburgh', course: 'MSc Data Science', match: 78, matchClass: 'match-mid',
+      status: 'not-applied', statusLabel: 'Not yet applied',
+      fees: '£31,900', duration: '1 year', start: 'Sept 2026', deadline: '30 Jun 2026', entry: '2:1 Hons', ielts: '7.0 overall',
+      why: "Outside your shortlist for now — course fit is strong, but the budget and IELTS requirement both run above your current profile.",
+      about: [
+        "Edinburgh's School of Informatics runs this MSc jointly with the Business School, with an optional dissertation track in NLP or computer vision.",
+        "One of only a handful of UK data science courses with a dedicated GPU cluster for student project work."
+      ],
+      city: [
+        "Edinburgh's student population is smaller and more concentrated than Manchester or Leeds, with most housing within a 30-minute walk of campus.",
+        "Higher cost of living than the north of England — budget £650–£850/month for shared housing."
+      ]
+    },
+    birmingham: {
+      name: 'University of Birmingham', course: 'MSc Data Science', match: 81, matchClass: 'match-mid',
+      status: 'not-applied', statusLabel: 'Not yet applied',
+      fees: '£27,540', duration: '1 year', start: 'Sept 2026', deadline: '1 Jul 2026', entry: '2:1 Hons', ielts: '6.5 overall',
+      why: 'A close budget and course match with a mid-year rolling deadline, giving you more room to firm up your application.',
+      about: [
+        "Birmingham's course splits evenly between statistical foundations and applied engineering, with a strong track record placing graduates into the West Midlands' growing fintech sector.",
+        "Optional industry-sponsored capstone projects are available in most years, subject to employer intake."
+      ],
+      city: [
+        "Birmingham is the UK's second-largest city with one of its largest South Asian communities — several dedicated Indian grocery and food districts near campus.",
+        "Lower cost of living than London or Manchester; shared housing typically £500–£650/month."
+      ]
+    },
+    warwick: {
+      name: 'University of Warwick', course: 'MSc Data Science', match: 88, matchClass: 'match-high',
+      status: 'not-applied', statusLabel: 'Not yet applied',
+      fees: '£29,850', duration: '1 year', start: 'Sept 2026', deadline: '15 May 2026', entry: '2:1 Hons', ielts: '6.5 overall',
+      why: 'A strong course and grade match, with a mid-May deadline that gives you more runway than most of your shortlist.',
+      about: [
+        "Warwick's MSc is run out of one of the UK's top-ranked statistics departments, with strong quantitative finance and consulting recruitment on campus.",
+        "Modules are assessed through a mix of coursework and an individual dissertation, with several tracks weighted toward industry application over pure research."
+      ],
+      city: [
+        "Warwick's campus sits between Coventry and Leamington Spa, with most student housing on or immediately around campus.",
+        "Frequent direct trains to Birmingham (25 min) and London (1h10); typical shared housing runs £480–£620/month."
+      ]
+    }
+  };
+
+  const params = new URLSearchParams(location.search);
+  const key = DATA[params.get('u')] ? params.get('u') : 'manchester';
+  const d = DATA[key];
+
+  document.title = d.name + ' — Atlas';
+  document.getElementById('crumbName').textContent = d.name;
+  document.getElementById('uniName').textContent = d.name;
+  document.getElementById('uniCourse').textContent = d.course;
+  document.getElementById('uniMatch').textContent = d.match + '% match';
+  document.getElementById('uniMatch').className = 'match-pill ' + d.matchClass;
+  document.getElementById('factFees').textContent = d.fees;
+  document.getElementById('factDuration').textContent = d.duration;
+  document.getElementById('factStart').textContent = d.start;
+  document.getElementById('factDeadline').textContent = d.deadline;
+  document.getElementById('factEntry').textContent = d.entry;
+  document.getElementById('factIelts').textContent = d.ielts;
+  document.getElementById('whyMatchText').textContent = d.why;
+  document.getElementById('aboutBody').innerHTML = d.about.map(p => `<p>${p}</p>`).join('');
+  document.getElementById('cityBody').innerHTML = d.city.map(p => `<p>${p}</p>`).join('');
+
+  const statusPill = document.getElementById('uniStatus');
+  const shortlistBtn = document.getElementById('shortlistBtn');
+  const onShortlist = ['manchester', 'ucl', 'leeds'].includes(key);
+  statusPill.textContent = d.statusLabel;
+  statusPill.className = 'status-pill ' + (d.status === 'not-applied' ? 'draft' : 'live');
+  shortlistBtn.textContent = onShortlist ? 'In your shortlist' : 'Add to shortlist';
+  shortlistBtn.className = 'btn ' + (onShortlist ? 'btn-secondary' : 'btn-primary');
+
+  const stepEls = [...document.querySelectorAll('#uniStepper .step')];
+  stepEls.forEach(s => s.classList.remove('done', 'now', 'locked'));
+  if (d.status === 'not-applied') { stepEls.forEach(s => s.classList.add('locked')); stepEls[0].classList.remove('locked'); stepEls[0].classList.add('now'); }
+  else if (d.status === 'offer') { stepEls[0].classList.add('done'); stepEls[1].classList.add('now'); stepEls[2].classList.add('locked'); }
+  else if (d.status === 'accepted') { stepEls[0].classList.add('done'); stepEls[1].classList.add('done'); stepEls[2].classList.add('done'); }
+
+  const applyCta = document.getElementById('applyCta');
+  if (d.status === 'not-applied') applyCta.textContent = 'Start application';
+  else if (d.status === 'offer') applyCta.textContent = 'View application';
+  else { applyCta.textContent = 'Go to visa checklist'; applyCta.addEventListener('click', () => location.href = 'index.html'); }
+
+  // one focus-card per screen, same as the portal's Home/Journey views —
+  // the single highlighted action for whichever stage this application is at
+  const FOCUS = {
+    'not-applied': { count: d.match, lbl: '% match', headline: 'You haven’t applied here yet', body: `Your deadline is ${d.deadline} — start now and you'll clear it with room to spare.`, cta: 'Start application' },
+    'offer': { count: 1, lbl: 'decision pending', headline: 'Waiting on your decision', body: `${d.name} has your application — most decisions land within 6–8 weeks of the ${d.deadline} deadline.`, cta: 'View application' },
+    'accepted': { count: 3, lbl: 'stages done', headline: 'Offer accepted — deposit paid', body: 'Everything after arrival stays locked until your visa decision lands. Head to the visa checklist to keep moving.', cta: 'Go to visa checklist' }
+  };
+  const f = FOCUS[d.status];
+  document.getElementById('focusCount').firstChild.textContent = f.count;
+  document.getElementById('focusCountLbl').textContent = f.lbl;
+  document.getElementById('focusHeadline').textContent = f.headline;
+  document.getElementById('focusBody').textContent = f.body;
+  const focusCta = document.getElementById('focusCta');
+  focusCta.textContent = f.cta;
+  focusCta.addEventListener('click', () => {
+    if (d.status === 'accepted') location.href = 'index.html';
+    else document.getElementById('uniStepper').scrollIntoView({ behavior: AtlasUI.REDUCE ? 'auto' : 'smooth', block: 'center' });
+  });
+
+  const compareOrder = ['manchester', 'ucl', 'leeds'];
+  document.getElementById('compareBody').innerHTML = compareOrder.map(k => {
+    const u = DATA[k];
+    return `<tr class="${k === key ? 'this-row' : ''}"><td>${u.name}</td><td><span class="match-pill ${u.matchClass}">${u.match}%</span></td><td>${u.fees}</td><td>${u.deadline}</td><td><span class="status-pill ${u.status === 'not-applied' ? 'draft' : 'live'}">${u.statusLabel}</span></td></tr>`;
+  }).join('');
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (document.referrer && document.referrer.includes(location.host)) history.back();
+    else location.href = 'index.html';
+  });
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' }));
+  } else {
+    AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' });
+  }
+})();
+</script>
+</body>
+</html>

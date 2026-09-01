@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  .cl-wrap{ max-width:720px; }
+  .cl-progress{ font-size:13px; color:var(--ink-soft); font-weight:600; margin-top:4px; }
+  .cl-row{ display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; }
+  .cl-row:hover{ background:var(--panel); border-radius:14px; }
+  .cl-row .row-label{ flex:1; }
+  .cl-row .note-dot{ width:7px; height:7px; border-radius:50%; background:var(--blue); margin-left:6px; display:none; }
+  .cl-row.has-note .note-dot{ display:inline-block; }
+</style>
+</head>
+<body>
+
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <div class="screen">
+    <div class="app">
+      <nav class="sidebar" id="sidebarRail" aria-label="Tools">
+        <div class="side-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div class="side-btn" title="Messages" onclick="location.href='messaging.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <div class="side-btn active" title="Document vault"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <div class="side-btn" title="Help &amp; support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg></div>
+        <div class="side-gap"></div>
+        <div class="side-btn" title="Settings" onclick="location.href='profile.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+        <div class="side-btn" id="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+      </nav>
+
+      <div class="main">
+        <div class="topbar">
+          <div class="brand">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+            atlas
+          </div>
+          <div class="topbar-back">
+            <div class="back-btn" id="backBtn" role="button" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Back
+            </div>
+            <div class="breadcrumb"><a href="index.html" style="color:inherit; text-decoration:none;">Journey</a><span class="sep">/</span><span class="current">Checklist</span></div>
+          </div>
+          <div class="top-right">
+            <div class="icon-btn" title="Notifications" onclick="location.href='notifications.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="profile-btn" title="Account menu">
+              <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="view active cl-wrap" id="detailView">
+          <div class="j-head reveal">
+            <div><h1>Your checklist</h1><p>Tick-only, per stage — no uploads. Your advisor sees exactly what you've confirmed.</p></div>
+          </div>
+
+          <div class="card accent-dark stage-rail reveal">
+            <div class="stepper" id="stageStepper">
+              <div class="step" data-stage="shortlist"><div class="step-dot">1</div><div class="step-lbl">Shortlist</div></div>
+              <div class="step" data-stage="applications"><div class="step-line"></div><div class="step-dot">2</div><div class="step-lbl">Applications</div></div>
+              <div class="step" data-stage="visa"><div class="step-line"></div><div class="step-dot">3</div><div class="step-lbl">Visa &amp; docs</div></div>
+              <div class="step" data-stage="after"><div class="step-line"></div><div class="step-dot">4</div><div class="step-lbl">After the visa</div></div>
+            </div>
+          </div>
+
+          <div class="card reveal" style="margin-top:18px;">
+            <div class="panel-head">
+              <h3 id="stageTitle">Visa &amp; docs</h3>
+              <span class="panel-note" id="stageCount">0/4</span>
+            </div>
+            <div class="list-card" id="stageList" style="margin:0 20px 20px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-backdrop" id="backdrop"></div>
+    <aside class="drawer" id="noteDrawer" aria-label="Add a note">
+      <div class="drawer-head">
+        <h3>Add a note</h3>
+        <div class="drawer-close" id="noteClose" role="button" tabindex="0" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+      </div>
+      <div class="drawer-body" style="padding:18px 22px;">
+        <div class="field" style="margin-bottom:16px;"><label class="field-label">Item</label><div id="noteItemTitle" style="font-size:15px; font-weight:700; margin-top:4px;"></div></div>
+        <div class="field"><label class="field-label" for="noteText">Note for your advisor</label><textarea class="field-input" id="noteText" rows="5" style="resize:vertical;" placeholder="e.g. 'Uploaded the wrong version, will fix tonight'"></textarea></div>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn btn-primary" id="noteSave">Save note</button>
+        <button class="btn btn-secondary" id="noteCancel">Cancel</button>
+      </div>
+    </aside>
+  </div>
+
+<script src="shared/atlas-shared.js"></script>
+<script>
+(function(){
+  const STAGES = {
+    shortlist: { label: 'Shortlist', items: [
+      { label: 'Shortlist confirmed with advisor', due: 'Done 28 Jul', done: true },
+      { label: 'SOP reviewed, ready to submit', due: 'Done 30 Jul', done: true }
+    ]},
+    applications: { label: 'Applications', items: [
+      { label: 'Personal statement submitted', due: '2 Aug', done: true },
+      { label: 'Academic references uploaded', due: '5 Aug', done: true },
+      { label: 'UCAS application fee paid', due: '5 Aug', done: true },
+      { label: 'Offer received — University of Manchester', due: '12 Aug', done: true },
+      { label: 'Offer accepted — deposit paid', due: '18 Aug', done: true }
+    ]},
+    visa: { label: 'Visa & docs', items: [
+      { label: 'CAS number requested', due: 'Due 2 Sept', done: false },
+      { label: 'Financial evidence check', due: 'Due 4 Sept', done: false },
+      { label: 'Visa biometrics appointment', due: 'Due 6 Sept', done: false },
+      { label: 'TB test certificate', due: 'Due 10 Sept', done: false }
+    ]},
+    after: { label: 'After the visa', items: [
+      { label: 'Housing shortlist', due: 'Unlocks after visa approval', done: false },
+      { label: 'Bank account setup', due: 'Unlocks after visa approval', done: false },
+      { label: 'SIM & mobile plan', due: 'Unlocks after visa approval', done: false },
+      { label: 'Travel insurance', due: 'Unlocks after visa approval', done: false }
+    ]}
+  };
+  const NOTES = {};
+  let activeStage = 'visa';
+
+  function renderStepper(){
+    const order = Object.keys(STAGES);
+    const idx = order.indexOf(activeStage);
+    document.querySelectorAll('#stageStepper .step').forEach((el, i) => {
+      el.classList.remove('done', 'now', 'locked');
+      if (i < idx) el.classList.add('done'); else if (i === idx) el.classList.add('now'); else el.classList.add('locked');
+    });
+  }
+
+  function renderList(){
+    const stage = STAGES[activeStage];
+    document.getElementById('stageTitle').textContent = stage.label;
+    const done = stage.items.filter(i => i.done).length;
+    document.getElementById('stageCount').textContent = `${done}/${stage.items.length}`;
+    document.getElementById('stageList').innerHTML = stage.items.map((item, i) => `
+      <div class="row cl-row ${NOTES[activeStage + i] ? 'has-note' : ''}" data-i="${i}">
+        <div class="mini-btn ${item.done ? 'done' : ''}" data-toggle="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="row-label">${item.label}<span class="note-dot"></span></div>
+        <div class="due ${item.due.startsWith('Due') ? 'soon' : ''}">${item.due}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('stageStepper').addEventListener('click', (e) => {
+    const step = e.target.closest('.step');
+    if (!step) return;
+    activeStage = step.dataset.stage;
+    renderStepper();
+    renderList();
+  });
+
+  const stageList = document.getElementById('stageList');
+  stageList.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-toggle]');
+    if (toggle) {
+      const i = +toggle.dataset.toggle;
+      STAGES[activeStage].items[i].done = !STAGES[activeStage].items[i].done;
+      if (!AtlasUI.skipGSAP && !AtlasUI.REDUCE) AtlasUI.spawnRipple(toggle);
+      renderList();
+      return;
+    }
+    const row = e.target.closest('.cl-row');
+    if (row) openNote(+row.dataset.i);
+  });
+
+  const noteDrawer = document.getElementById('noteDrawer');
+  const backdrop = document.getElementById('backdrop');
+  let noteIndex = null;
+  function openNote(i){
+    noteIndex = i;
+    document.getElementById('noteItemTitle').textContent = STAGES[activeStage].items[i].label;
+    document.getElementById('noteText').value = NOTES[activeStage + i] || '';
+    AtlasUI.openDrawer(noteDrawer, backdrop);
+  }
+  function closeNote(){ AtlasUI.closeDrawer(noteDrawer, backdrop); }
+  document.getElementById('noteClose').addEventListener('click', closeNote);
+  document.getElementById('noteCancel').addEventListener('click', closeNote);
+  backdrop.addEventListener('click', closeNote);
+  document.getElementById('noteSave').addEventListener('click', () => {
+    const text = document.getElementById('noteText').value.trim();
+    if (text) NOTES[activeStage + noteIndex] = text; else delete NOTES[activeStage + noteIndex];
+    closeNote();
+    renderList();
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (document.referrer && document.referrer.includes(location.host)) history.back();
+    else location.href = 'index.html';
+  });
+
+  renderStepper();
+  renderList();
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' }));
+  } else {
+    AtlasUI.boot({ enter: 'slide', slideTarget: '#detailView' });
+  }
+})();
+</script>
+</body>
+</html>

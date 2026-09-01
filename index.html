@@ -7,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- additive only: the new drawer/notification-row classes used to wire up
+     the bell + task drawers below. Defines no token or class that already
+     exists in this file's own <style> blocks, so it changes nothing else. -->
+<link rel="stylesheet" href="shared/atlas-extended.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <template id="__bundler_thumbnail" data-bg-color="#ececec">
@@ -188,6 +192,9 @@
   }
   .pillnav button.active{background:var(--accent); color:var(--panel);}
   .pillnav button:not(.active):hover{color:var(--ink);}
+  /* icons ship in the markup for the mobile bottom-tab-bar pattern below,
+     hidden here so desktop's pill-nav renders exactly as before */
+  .pillnav .nav-icon{ display:none; }
 
   .top-right{
     margin-left:auto;
@@ -831,6 +838,83 @@
   .svc-why{ color:#a33f01; }
   [data-theme="dark"] .svc-why{ color:#f16001; }
 </style>
+
+<style>
+  /* ===========================================================
+     Mobile navigation pattern — ux-spec.md §4. Added as its own
+     final layer rather than edited into the blocks above, so the
+     original mobile rules stay intact for history/diff and this
+     simply wins the cascade (same specificity, declared later).
+     Nothing here fires above 620px — desktop is unchanged.
+     =========================================================== */
+
+  /* account menu (mobile collapse target for the tools rail) —
+     base rules live outside the media query since the menu itself
+     stays display:none until JS opens it, at any width */
+  .top-right{ position:relative; }
+  .account-menu{
+    display:none; position:absolute; top:calc(100% + 10px); right:0;
+    min-width:220px; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--r-lg); box-shadow:var(--shadow-card-hover);
+    padding:8px; z-index:15;
+  }
+  .account-menu.on{ display:block; }
+  .account-menu-item{
+    display:flex; align-items:center; gap:12px; padding:11px 12px;
+    border-radius:12px; font-size:13.5px; font-weight:600; color:var(--ink);
+    cursor:pointer; min-height:44px;
+  }
+  .account-menu-item:hover{ background:var(--panel); }
+  .account-menu-item svg{ width:17px; height:17px; color:var(--ink-soft); flex:none; }
+  .account-menu-sep{ height:1px; background:var(--line); margin:6px 4px; }
+
+  /* Journey board sub-tabs (mobile only — see .j-subtabs display below) */
+  .j-subtabs{ display:none; gap:8px; overflow-x:auto; margin-bottom:14px; }
+
+  @media (max-width:620px){
+    /* sidebar tools stop being persistent chrome */
+    .sidebar{ display:none; }
+    .app{ flex-direction:column; }
+    .main{ padding-bottom:78px; } /* clears the fixed bottom tab bar */
+
+    /* topbar: brand + bell + avatar only. Also: .topbar and .view are
+       siblings that both carry z-index:2 in the base stylesheet — at
+       equal z-index the later-DOM .view paints over .topbar, which traps
+       the now-fixed pillnav underneath page content despite its own
+       z-index:9 (a fixed element's stacking is resolved within its
+       nearest stacking-context ancestor, not the root). Bumping .topbar
+       above .view here — mobile-only — is what actually fixes that. */
+    .topbar{ flex-wrap:nowrap; padding:14px 16px; gap:10px; z-index:11; }
+    .icon-btn{ width:44px; height:44px; }
+    .profile-btn{ padding:5px; margin:-5px; } /* pad the tap target to ~44px without growing the avatar */
+
+    /* pill-nav leaves the topbar and becomes the fixed bottom tab bar */
+    .pillnav{
+      position:fixed; left:0; right:0; bottom:0; z-index:9;
+      width:auto; background:var(--card); border:none; border-top:1px solid var(--line);
+      border-radius:0; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+      display:flex; justify-content:space-around;
+    }
+    .pillnav button{
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+      background:transparent; color:var(--ink-soft); padding:6px 2px; border-radius:12px;
+      font-size:10.5px; min-height:44px;
+    }
+    .pillnav button.active{ background:transparent; color:var(--accent); }
+    .pillnav .nav-icon{ display:block; width:20px; height:20px; }
+
+    /* touch targets */
+    .mini-btn{ width:36px; height:36px; }
+    .chip{ min-height:44px; display:inline-flex; align-items:center; }
+
+    /* Journey: one board column at a time, swipeable, instead of a
+       4-column vertical scroll */
+    .j-subtabs{ display:flex; }
+    .j-board{ grid-template-columns:1fr; }
+    .j-board > .j-col{ display:none; }
+    .j-board > .j-col.active-col{ display:flex; }
+  }
+</style>
 </head>
 <body>
 
@@ -869,10 +953,10 @@
           </div>
 
           <nav class="pillnav" id="pillnav" aria-label="Sections">
-            <button data-view="home">Home</button>
-            <button data-view="journey" class="active">Journey</button>
-            <button data-view="services">Services</button>
-            <button data-view="community">Community</button>
+            <button data-view="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Home</span></button>
+            <button data-view="journey"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.4-7-11a7 7 0 0 1 14 0c0 4.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Journey</span></button>
+            <button data-view="services"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Services</span></button>
+            <button data-view="community"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17.5" cy="9" r="2.3"/><path d="M15.3 14.4c2.6.5 4.7 2.5 4.7 5.6"/></svg><span>Community</span></button>
           </nav>
 
           <div class="top-right">
@@ -881,11 +965,23 @@
               <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
             </div>
+
+            <!-- mobile only: the sidebar tools rail collapses into this menu
+                 off the avatar instead of staying persistent chrome (ux spec §4) -->
+            <div class="account-menu" id="accountMenu">
+              <div class="account-menu-item" data-action="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Search</div>
+              <div class="account-menu-item" data-href="messaging.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Messages</div>
+              <div class="account-menu-item" data-href="checklist.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>Document vault</div>
+              <div class="account-menu-item" data-action="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg>Help &amp; support</div>
+              <div class="account-menu-sep"></div>
+              <div class="account-menu-item" data-href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>Profile &amp; settings</div>
+              <div class="account-menu-item" data-action="theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Toggle theme</div>
+            </div>
           </div>
         </div>
 
         <!-- ===================== JOURNEY VIEW ===================== -->
-        <div class="view active" id="view-journey">
+        <div class="view" id="view-journey">
           <div class="j-head reveal">
             <div>
               <h1>Your Journey</h1>
@@ -929,7 +1025,16 @@
             </div>
           </div>
 
-          <div class="j-board">
+          <!-- mobile only: one board column at a time instead of a 4-column
+               scroll (ux spec §4) — swipeable, wired near the bottom of this file -->
+          <div class="j-subtabs" id="jSubtabs">
+            <button class="chip active" data-col="0">Shortlist</button>
+            <button class="chip" data-col="1">Applications</button>
+            <button class="chip" data-col="2">Visa &amp; docs</button>
+            <button class="chip" data-col="3">After visa</button>
+          </div>
+
+          <div class="j-board" id="jBoard">
             <!-- col 1: shortlist -->
             <div class="j-col reveal">
               <div class="col-label">Shortlist <span class="col-count">2/2</span></div>
@@ -1118,7 +1223,31 @@
         </div>
 
         <!-- ===================== HOME VIEW ===================== -->
-        <div class="view" id="view-home">
+        <div class="view active" id="view-home">
+          <!-- brand-new-user state (ux spec §5): "shouldn't show zeroed-out
+               stats — a .focus-card CTA instead." Hidden unless ?newuser=1
+               is in the URL, so the default page is unchanged either way. -->
+          <div id="homeEmptyState" style="display:none;">
+            <div class="j-head reveal">
+              <div>
+                <h1>Welcome, Harman</h1>
+                <p>Let's find your shortlist — it takes about three minutes.</p>
+              </div>
+            </div>
+            <div class="focus-card reveal">
+              <div class="focus-count">3<small>minutes</small></div>
+              <div class="focus-body">
+                <h2>Take the quiz to get your shortlist</h2>
+                <p>Answer a few questions about your course, budget and grades — we'll match you against a curated UK catalogue. No account needed to start.</p>
+              </div>
+              <button type="button" class="focus-cta" onclick="location.href='onboarding.html'">Take the 3-minute quiz</button>
+            </div>
+            <div class="empty-card reveal">
+              <b>No shortlist yet</b>
+              Your matched universities will show up here once you've finished the quiz.
+            </div>
+          </div>
+
           <div class="j-head reveal">
             <div>
               <h1>Welcome back, Harman</h1>
@@ -1282,19 +1411,19 @@
           </div>
           <div class="comm-grid" id="commGrid">
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--blue);"></span>Jobs<span class="comm-view-all">View all</span></h3>
+              <h3><span class="dot" style="background:var(--blue);"></span>Jobs<span class="comm-view-all" data-type="job">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">Part-time · Manchester</div><h5>Library assistant, University of Manchester</h5><p>18 hrs/wk · within standard visa work limits</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">Part-time · Remote</div><h5>Content intern, student-run publication</h5><p>Flexible hours · portfolio-building role</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">Graduate route</div><h5>Junior analyst, fintech scale-up</h5><p>Sponsors Skilled Worker visa applicants</p></div>
             </div>
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--coral);"></span>Events<span class="comm-view-all">View all</span></h3>
+              <h3><span class="dot" style="background:var(--coral);"></span>Events<span class="comm-view-all" data-type="event">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">3 Sept · Online</div><h5>Pre-departure briefing: what to pack</h5><p>Hosted by students already in Manchester</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">10 Sept · Leeds</div><h5>New arrivals meetup</h5><p>Coffee, SIM cards, and a campus walk-through</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">14 Sept · Online</div><h5>Opening your bank account, live Q&amp;A</h5><p>With a partner bank's student team</p></div>
             </div>
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--green);"></span>Guides<span class="comm-view-all">View all</span></h3>
+              <h3><span class="dot" style="background:var(--green);"></span>Guides<span class="comm-view-all" data-type="guide">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">6 min read</div><h5>Registering with a GP in your first week</h5><p>What the NHS actually requires from you</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">4 min read</div><h5>Council tax exemption for students</h5><p>The one form that saves you real money</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">5 min read</div><h5>Building UK credit history from zero</h5><p>Why it matters before you graduate</p></div>
@@ -1318,8 +1447,8 @@
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
     document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = '1'; });
-    const journey = document.getElementById('view-journey');
-    if (journey) journey.classList.add('active');
+    const home = document.getElementById('view-home');
+    if (home) home.classList.add('active');
     const ring = document.getElementById('ringProgress');
     const label = document.getElementById('ringLabel');
     if (ring) ring.setAttribute('stroke-dashoffset', '88');
@@ -1538,7 +1667,7 @@
   });
 
 
-  if (!REDUCE && !skipGSAP){
+  if (!REDUCE && !skipGSAP && !window.matchMedia('(hover: none)').matches){
     document.querySelectorAll('.tilt').forEach(el => {
       gsap.set(el, { transformPerspective: 700 });
       const rotX = gsap.quickTo(el, 'rotationX', { duration: .5, ease: 'power3' });
@@ -1648,14 +1777,14 @@
   /* ---------- boot sequence ---------- */
   function boot(){
     const loader = document.getElementById('loader');
-    const journey = document.getElementById('view-journey');
+    const home = document.getElementById('view-home');
 
     if (skipGSAP){ initFallback(); return; }
 
     if (REDUCE){
       if (loader) loader.style.display = 'none';
-      revealView(journey);
-      runHomeExtras(document.getElementById('view-home'));
+      revealView(home);
+      runHomeExtras(home);
       setupScrollReveals();
       return;
     }
@@ -1673,13 +1802,380 @@
       .to('#loader', { opacity: 0, duration: .45, ease: 'power2.inOut', onComplete(){ loader.style.display = 'none'; } })
       .to(['.brand', '.pillnav', '.top-right'], { opacity: 1, y: 0, duration: .5, ease: 'power3.out', stagger: .06 }, '-=.15')
       .to('#sidebarRail .side-btn', { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)', stagger: .05 }, '-=.4')
-      .add(() => { revealView(journey); }, '-=.25');
+      .add(() => { revealView(home); runHomeExtras(home); }, '-=.25');
   }
 
   if (document.readyState === 'loading'){
     window.addEventListener('DOMContentLoaded', boot);
   } else {
     boot();
+  }
+})();
+</script>
+
+<!-- ============================================================
+     Flow wiring — additive only. Every element below is new; nothing
+     above this comment was touched, and the drawers reuse the same
+     .drawer component already shipped for notifications.html so the
+     interaction (right-side slide-over, 40% backdrop, Esc/backdrop
+     to close) matches everywhere it appears.
+     ============================================================ -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+<aside class="drawer" id="notifDrawer" aria-label="Notifications">
+  <div class="drawer-head">
+    <h3>Notifications</h3>
+    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="drawer-body" id="notifList"></div>
+</aside>
+
+<aside class="drawer" id="taskDrawer" aria-label="Task detail">
+  <div class="drawer-head">
+    <h3>Task</h3>
+    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close task">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="drawer-body" style="padding:18px 22px;">
+    <div class="field" style="margin-bottom:16px;">
+      <label class="field-label">Task</label>
+      <div id="taskTitle" style="font-size:15px; font-weight:700; margin-top:4px;"></div>
+    </div>
+    <div class="field" style="margin-bottom:18px;">
+      <label class="field-label">Due</label>
+      <div id="taskDue" style="font-size:13.5px; color:var(--ink-soft); margin-top:4px;"></div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="taskNote">Note for your advisor</label>
+      <textarea class="field-input" id="taskNote" rows="5" style="resize:vertical;" placeholder="Add context, a question, or a link…"></textarea>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-primary" id="taskMarkDone">Mark complete</button>
+    <button class="btn btn-secondary" data-close-drawer>Close</button>
+  </div>
+</aside>
+
+<aside class="drawer" id="helpDrawer" aria-label="Help and support">
+  <div class="drawer-head">
+    <h3>Help &amp; support</h3>
+    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close help">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="drawer-body" style="padding:6px 22px 20px;">
+    <div class="sec-head" style="margin-top:14px;"><h2 style="font-size:13px;">Frequently asked</h2></div>
+    <div class="field-help" style="margin-bottom:16px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">How fast do advisors reply?</b>Usually within one business day — faster during application deadlines.</div>
+    <div class="field-help" style="margin-bottom:16px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">Is Atlas really free?</b>Yes — always, for students. Service partners pay a flat, published fee, never a commission on your choices.</div>
+    <div class="field-help" style="margin-bottom:20px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">Can I change my shortlist later?</b>Yes, from Journey — add or remove universities at any stage before you apply.</div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-primary btn-block" onclick="location.href='messaging.html'">Message an advisor</button>
+  </div>
+</aside>
+
+<aside class="drawer" id="searchDrawer" aria-label="Search Atlas">
+  <div class="drawer-head">
+    <h3>Search</h3>
+    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div style="padding:14px 22px 0;">
+    <input class="field-input" id="globalSearch" placeholder="Search universities, services, community…" autocomplete="off">
+  </div>
+  <div class="drawer-body" id="searchResults"></div>
+</aside>
+
+<script src="shared/atlas-shared.js"></script>
+<script>
+(function(){
+  /* ---------- shared drawer open/close ---------- */
+  const backdrop = document.getElementById('drawerBackdrop');
+  let openDrawerEl = null;
+  function showDrawer(el){
+    if (openDrawerEl) AtlasUI.closeDrawer(openDrawerEl, backdrop);
+    openDrawerEl = el;
+    AtlasUI.openDrawer(el, backdrop);
+  }
+  function hideDrawer(){
+    if (openDrawerEl) AtlasUI.closeDrawer(openDrawerEl, backdrop);
+    openDrawerEl = null;
+  }
+  backdrop.addEventListener('click', hideDrawer);
+  document.querySelectorAll('[data-close-drawer]').forEach(el => el.addEventListener('click', hideDrawer));
+
+  /* ---------- notification bell -> drawer (not a page navigation) ---------- */
+  const NOTIFS = [
+    { icon: 'coral', unread: true, time: '2h ago', title: 'Visa biometrics appointment', body: '6 days left — book your slot at the Manchester visa centre.', svg: '<path d="M12 8v5M12 16v.1"/><circle cx="12" cy="12" r="9"/>' },
+    { icon: 'blue', unread: true, time: '5h ago', title: 'New message from Priya S.', body: 'Your SOP looks ready — go ahead and submit whenever you’re set.', svg: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>' },
+    { icon: 'green', unread: true, time: '1d ago', title: 'Offer accepted — University of Manchester', body: 'Your deposit has been confirmed. Next: the visa stage.', svg: '<path d="M20 6L9 17l-5-5"/>' },
+    { icon: 'gold', unread: false, time: '2d ago', title: 'New event: Pre-departure briefing', body: '3 Sept · Online — hosted by students already in Manchester.', svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
+    { icon: 'coral', unread: false, time: '3d ago', title: 'Financial evidence check due', body: 'Due 4 September — upload your forex transfer receipt.', svg: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>' }
+  ];
+  function renderNotifs(){
+    document.getElementById('notifList').innerHTML = NOTIFS.map(n => `
+      <div class="notif-row ${n.unread ? 'unread' : ''}">
+        <div class="notif-icon ${n.icon}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${n.svg}</svg></div>
+        <div class="notif-text"><b>${n.title}</b><span>${n.body}</span></div>
+        <span class="notif-time">${n.time}</span>
+      </div>
+    `).join('');
+  }
+  renderNotifs();
+  const bell = document.querySelector('.top-right .icon-btn');
+  if (bell){
+    bell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showDrawer(document.getElementById('notifDrawer'));
+    });
+  }
+
+  /* ---------- profile avatar -> profile page (desktop) or account menu
+     (mobile) — wired further down, once, near the account-menu markup ---------- */
+
+  /* ---------- sidebar tool icons ---------- */
+  const railIcons = document.querySelectorAll('#sidebarRail .side-btn');
+  // order in the markup: Search, Messages, Document vault, Help & support, (gap), Settings, theme toggle
+  if (railIcons[0]) railIcons[0].addEventListener('click', (e) => { e.stopPropagation(); showDrawer(document.getElementById('searchDrawer')); document.getElementById('globalSearch').focus(); });
+  if (railIcons[1]) railIcons[1].addEventListener('click', () => location.href = 'messaging.html');
+  if (railIcons[2]) railIcons[2].addEventListener('click', () => location.href = 'checklist.html');
+  if (railIcons[3]) railIcons[3].addEventListener('click', (e) => { e.stopPropagation(); showDrawer(document.getElementById('helpDrawer')); });
+  if (railIcons[4]) railIcons[4].addEventListener('click', () => location.href = 'profile.html'); // Settings
+
+  /* ---------- global search across the catalogue, services, community ---------- */
+  const SEARCH_INDEX = [
+    { label: 'University of Manchester', sub: 'University · MSc Data Science', href: 'university-detail.html?u=manchester' },
+    { label: 'UCL', sub: 'University · MSc Data Science', href: 'university-detail.html?u=ucl' },
+    { label: 'University of Leeds', sub: 'University · MSc Data Science', href: 'university-detail.html?u=leeds' },
+    { label: 'University of Warwick', sub: 'University · MSc Data Science', href: 'university-detail.html?u=warwick' },
+    { label: 'University of Birmingham', sub: 'University · MSc Data Science', href: 'university-detail.html?u=birmingham' },
+    { label: 'University of Edinburgh', sub: 'University · MSc Data Science', href: 'university-detail.html?u=edinburgh' },
+    { label: 'UK bank account', sub: 'Service · 4 partners', href: 'service-detail.html?cat=bank' },
+    { label: 'SIM & mobile plan', sub: 'Service · 3 partners', href: 'service-detail.html?cat=sim' },
+    { label: 'Housing', sub: 'Service · 6 partners', href: 'service-detail.html?cat=housing' },
+    { label: 'Foreign exchange', sub: 'Service · 3 partners', href: 'service-detail.html?cat=forex' },
+    { label: 'Insurance', sub: 'Service · 2 partners', href: 'service-detail.html?cat=insurance' },
+    { label: 'Student loans', sub: 'Service · 5 partners', href: 'service-detail.html?cat=loans' },
+    { label: 'Library assistant, University of Manchester', sub: 'Job', href: 'community-detail.html?type=job&id=lib' },
+    { label: 'Pre-departure briefing: what to pack', sub: 'Event · 3 Sept', href: 'community-detail.html?type=event&id=briefing' },
+    { label: 'Registering with a GP in your first week', sub: 'Guide', href: 'community-detail.html?type=guide&id=gp' },
+    { label: 'Council tax exemption for students', sub: 'Guide', href: 'community-detail.html?type=guide&id=counciltax' }
+  ];
+  const searchInput = document.getElementById('globalSearch');
+  const searchResults = document.getElementById('searchResults');
+  function renderSearch(){
+    const q = searchInput.value.trim().toLowerCase();
+    const rows = q ? SEARCH_INDEX.filter(r => r.label.toLowerCase().includes(q)) : SEARCH_INDEX.slice(0, 6);
+    searchResults.innerHTML = rows.map(r => `<div class="row" data-href="${r.href}" role="button" tabindex="0" style="cursor:pointer; padding:12px 22px;"><div class="row-label">${r.label}<br><span style="color:var(--ink-soft); font-weight:500; font-size:12px;">${r.sub}</span></div></div>`).join('')
+      || '<div class="empty on"><b>No matches</b>Try a different search term.</div>';
+  }
+  renderSearch();
+  searchInput.addEventListener('input', renderSearch);
+  searchResults.addEventListener('click', (e) => { const row = e.target.closest('[data-href]'); if (row) location.href = row.dataset.href; });
+
+  /* ---------- Home: shortlist cards -> university detail ---------- */
+  const SHORTLIST_SLUGS = ['manchester', 'ucl', 'leeds'];
+  document.querySelectorAll('#view-home .shortlist-grid .shortlist-card').forEach((card, i) => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => location.href = `university-detail.html?u=${SHORTLIST_SLUGS[i] || 'manchester'}`);
+  });
+
+  /* ---------- Home: "View full journey" -> switch to the Journey tab ---------- */
+  document.querySelector('#view-home .panel-head .svc-link')?.addEventListener('click', () => {
+    document.querySelector('#pillnav [data-view="journey"]')?.click();
+  });
+
+  /* ---------- Home: advisor rows -> messaging, correct thread ---------- */
+  const advisorRows = document.querySelectorAll('#view-home .home-side .card:nth-of-type(2) .row');
+  const ADVISOR_THREADS = ['priya', 'james'];
+  advisorRows.forEach((row, i) => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.mini-btn')) return; // let the existing tick/ripple behavior keep working
+      location.href = `messaging.html?thread=${ADVISOR_THREADS[i] || 'priya'}`;
+    });
+  });
+
+  /* ---------- Home + Journey: focus-cta buttons ---------- */
+  document.querySelectorAll('.focus-cta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const label = btn.textContent.trim();
+      if (label === 'Open the visa checklist' || label === 'Book appointment') location.href = 'checklist.html';
+    });
+  });
+
+  /* ---------- Services: svc-card "Explore" -> service detail ---------- */
+  document.querySelectorAll('#view-services .svc-card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.chip')) return;
+      const cat = card.dataset.cat;
+      if (cat) location.href = `service-detail.html?cat=${cat}`;
+    });
+  });
+
+  /* ---------- Journey: "after the visa" tiles -> matching service category ---------- */
+  const NEXT_GRID_CATS = ['housing', 'bank', 'sim', 'insurance'];
+  document.querySelectorAll('#view-journey .next-grid .card').forEach((tile, i) => {
+    tile.style.cursor = 'pointer';
+    tile.addEventListener('click', () => location.href = `service-detail.html?cat=${NEXT_GRID_CATS[i] || 'housing'}`);
+  });
+
+  /* ---------- Journey: board toolbar (add task / calendar) ---------- */
+  const boardIcons = document.querySelectorAll('#view-journey .board-toolbar .icon-btn');
+  if (boardIcons[0]) boardIcons[0].addEventListener('click', (e) => { e.stopPropagation(); openTaskDrawer('New task', 'No due date yet'); });
+  if (boardIcons[1]) boardIcons[1].addEventListener('click', () => location.href = 'calendar.html');
+
+  /* ---------- Journey: task/row items -> task-detail drawer ---------- */
+  function openTaskDrawer(title, due){
+    document.getElementById('taskTitle').textContent = title;
+    document.getElementById('taskDue').textContent = due;
+    document.getElementById('taskNote').value = '';
+    showDrawer(document.getElementById('taskDrawer'));
+  }
+  document.querySelectorAll('#view-journey .task, #view-journey .row').forEach(item => {
+    if (item.closest('.next-grid')) return; // handled above as service links
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.mini-btn, .plus')) return; // keep existing tick/add behavior working; .more now opens the drawer too — that's what "more options" means here
+      const label = item.querySelector('.task-label, .row-label')?.textContent.trim() || 'Task';
+      const due = item.querySelector('.due')?.textContent.trim() || 'No due date';
+      openTaskDrawer(label, due);
+    });
+  });
+  document.getElementById('taskMarkDone').addEventListener('click', hideDrawer);
+
+  /* ---------- Journey/Community: "Add guide" / "Add milestone" -> reuse the
+     task drawer as a lightweight add-item form (spec §2: lightweight actions
+     are drawers). "Export guides" has no meaningful client-side action
+     without a backend, so it's left as-is rather than faked. ---------- */
+  document.querySelector('[title="Add guide"]')?.addEventListener('click', () => openTaskDrawer('New guide', 'No date set'));
+  document.querySelector('[title="Add milestone"]')?.addEventListener('click', () => openTaskDrawer('New milestone', 'No date set'));
+
+  /* ---------- Journey: "suggested guides" table rows have no matching built
+     guide content today (their titles don't match any community-detail.html
+     record) — left unwired rather than linked to a mismatched article. ---------- */
+
+  /* ---------- Home: "Next up" task list -> task-detail drawer ---------- */
+  document.querySelectorAll('#view-home .tasklist .row').forEach(item => {
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.mini-btn, .plus')) return;
+      const label = item.querySelector('.task-label, .row-label')?.textContent.trim() || 'Task';
+      const due = item.querySelector('.due')?.textContent.trim() || 'No due date';
+      openTaskDrawer(label, due);
+    });
+  });
+
+  /* ---------- Home: profile ring -> profile page ---------- */
+  const ringCard = document.querySelector('#view-home .ring-card');
+  if (ringCard) {
+    ringCard.style.cursor = 'pointer';
+    ringCard.addEventListener('click', () => location.href = 'profile.html');
+  }
+
+  /* ---------- Community: cards -> community detail ---------- */
+  const COMM_MAP = {
+    'Library assistant, University of Manchester': ['job', 'lib'],
+    'Content intern, student-run publication': ['job', 'intern'],
+    'Junior analyst, fintech scale-up': ['job', 'analyst'],
+    'Pre-departure briefing: what to pack': ['event', 'briefing'],
+    'New arrivals meetup': ['event', 'meetup'],
+    "Opening your bank account, live Q&A": ['event', 'bankqa'],
+    'Registering with a GP in your first week': ['guide', 'gp'],
+    'Council tax exemption for students': ['guide', 'counciltax'],
+    'Building UK credit history from zero': ['guide', 'credit']
+  };
+  document.querySelectorAll('#view-community .comm-card').forEach(card => {
+    const title = card.querySelector('h5')?.textContent.trim();
+    const match = title && COMM_MAP[title];
+    if (!match) return;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => location.href = `community-detail.html?type=${match[0]}&id=${match[1]}`);
+  });
+
+  /* ---------- Community: "View all" -> community-list.html ---------- */
+  document.querySelectorAll('#view-community .comm-view-all[data-type]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      location.href = `community-list.html?type=${el.dataset.type}`;
+    });
+  });
+
+  /* ---------- mobile: account menu (sidebar collapse target, spec §4) ---------- */
+  const accountMenu = document.getElementById('accountMenu');
+  const profileBtn = document.querySelector('.profile-btn');
+  const isMobile = () => window.matchMedia('(max-width:620px)').matches;
+
+  function closeAccountMenu(){ accountMenu.classList.remove('on'); }
+  function toggleAccountMenu(){ accountMenu.classList.toggle('on'); }
+
+  if (profileBtn){
+    profileBtn.addEventListener('click', (e) => {
+      if (isMobile()){
+        e.stopPropagation();
+        toggleAccountMenu();
+      } else {
+        location.href = 'profile.html';
+      }
+    });
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#accountMenu, .profile-btn')) closeAccountMenu();
+  });
+  accountMenu?.addEventListener('click', (e) => {
+    const item = e.target.closest('.account-menu-item');
+    if (!item) return;
+    if (item.dataset.href) { location.href = item.dataset.href; return; }
+    if (item.dataset.action === 'search') { closeAccountMenu(); showDrawer(document.getElementById('searchDrawer')); document.getElementById('globalSearch').focus(); return; }
+    if (item.dataset.action === 'help') { closeAccountMenu(); showDrawer(document.getElementById('helpDrawer')); return; }
+    if (item.dataset.action === 'theme') { closeAccountMenu(); document.getElementById('themeToggle')?.click(); return; }
+  });
+
+  /* ---------- mobile: Journey board sub-tabs + swipe (spec §4) ---------- */
+  const jSubtabs = document.getElementById('jSubtabs');
+  const jBoard = document.getElementById('jBoard');
+  const jCols = jBoard ? [...jBoard.querySelectorAll(':scope > .j-col')] : [];
+  function setActiveCol(i){
+    jCols.forEach((c, idx) => c.classList.toggle('active-col', idx === i));
+    jSubtabs?.querySelectorAll('button').forEach((b, idx) => b.classList.toggle('active', idx === i));
+  }
+  setActiveCol(0);
+  jSubtabs?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    setActiveCol([...jSubtabs.children].indexOf(btn));
+  });
+  if (jBoard){
+    let touchStartX = null;
+    jBoard.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    jBoard.addEventListener('touchend', (e) => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const current = jCols.findIndex(c => c.classList.contains('active-col'));
+      if (Math.abs(dx) > 40){
+        if (dx < 0 && current < jCols.length - 1) setActiveCol(current + 1);
+        else if (dx > 0 && current > 0) setActiveCol(current - 1);
+      }
+      touchStartX = null;
+    }, { passive: true });
+  }
+
+  /* ---------- brand-new-user Home state (spec §5) — demo via ?newuser=1,
+     the default page is untouched either way ---------- */
+  if (new URLSearchParams(location.search).get('newuser')){
+    const emptyState = document.getElementById('homeEmptyState');
+    if (emptyState){
+      [...document.querySelectorAll('#view-home > *')].forEach(el => {
+        if (el.id !== 'homeEmptyState') el.style.display = 'none';
+      });
+      emptyState.style.display = '';
+      AtlasUI.revealNow(emptyState.querySelectorAll('.reveal'));
+    }
   }
 })();
 </script>
