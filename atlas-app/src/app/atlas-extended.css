@@ -233,3 +233,60 @@ a.btn{ text-decoration:none; }
 }
 .banner-error svg{ width:16px; height:16px; color:var(--coral); flex:none; margin-top:1px; }
 .banner-error .retry{ font-weight:700; color:var(--coral); cursor:pointer; margin-left:auto; flex:none; white-space:nowrap; }
+
+/* ---------- 6. trust features (atlas-portal-improvements.md §1) ----------
+   Atlas has no commission conflict — these make that visible on the exact
+   card/screen a student is already looking at, not just in a policy page. */
+.trust-tag{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; color:var(--green);
+  margin-top:2px;
+}
+.trust-tag svg{ width:12px; height:12px; flex:none; }
+
+/* per-service-card money-relationship line — who provides it + that Atlas
+   earns nothing, right on the card, not buried in the Services banner */
+.svc-earn{
+  display:flex; align-items:center; gap:6px;
+  font-size:11.5px; font-weight:600; color:var(--ink-soft);
+  padding-top:10px; margin-top:2px; border-top:1px solid var(--line);
+}
+.svc-earn svg{ width:13px; height:13px; flex:none; color:var(--green); }
+.svc-earn b{ color:var(--ink); font-weight:700; }
+
+/* financing comparison table (loans/forex) — real computed numbers, not a
+   bare "N partners -> Explore" link */
+.compare-calc{
+  display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap;
+  padding:16px 20px; background:var(--panel); border-radius:var(--r-md);
+  margin:0 20px 18px;
+}
+.compare-calc .field{ gap:5px; min-width:140px; }
+.compare-calc .field-label{ font-size:11.5px; }
+.compare-calc .field-input{ padding:9px 12px; font-size:13.5px; }
+.fin-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.fin-table th{ text-align:left; font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.02em; padding:0 20px 10px; }
+.fin-table td{ padding:12px 20px; border-top:1px solid var(--line); }
+.fin-table tr:first-child td{ border-top:none; }
+.fin-table td b{ font-family:'Montserrat',sans-serif; }
+.fin-table .fin-best{ background:var(--green-soft); }
+.fin-table .fin-best-tag{ font-size:10px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:.02em; margin-left:6px; }
+
+/* after-care 30/60/90 check-in checklist, inside Community */
+.aftercare-card{
+  background:var(--panel); border-radius:var(--r-lg); padding:20px;
+  margin-bottom:20px;
+}
+.aftercare-contact{
+  display:flex; align-items:center; gap:12px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-md);
+  padding:12px 14px; margin-top:14px;
+}
+.aftercare-tabs{ display:flex; gap:6px; margin-top:16px; }
+.aftercare-tabs button{
+  appearance:none; border:1px solid var(--line); background:var(--card);
+  font-family:inherit; font-size:12.5px; font-weight:700; color:var(--ink-soft);
+  padding:7px 14px; border-radius:999px; cursor:pointer;
+}
+.aftercare-tabs button.active{ background:var(--ink); color:var(--card); border-color:var(--ink); }
+[data-theme="dark"] .aftercare-tabs button.active{ background:var(--card); color:var(--ink); border-color:var(--card); }

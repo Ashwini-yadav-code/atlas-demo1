@@ -82,8 +82,20 @@
             Every partner below is vetted on our terms — paying more never buys a higher place in this list.
           </div>
 
+          <div class="card reveal" id="finCompareCard" style="display:none; margin-top:22px;">
+            <div class="panel-head"><h3 id="finCompareTitle">Compare the real cost</h3></div>
+            <div class="compare-calc" id="finCalc"></div>
+            <div class="table-scroll">
+              <table class="fin-table" id="finTable"></table>
+            </div>
+            <p style="font-size:11.5px; color:var(--ink-soft); padding:10px 20px 18px;">Estimates only, for comparison — each provider's real quote depends on your credit profile and can differ from this.</p>
+          </div>
+
           <div class="card reveal" style="margin-top:22px;">
-            <div class="panel-head"><h3>Compare partners</h3></div>
+            <div class="panel-head">
+              <h3>Compare partners</h3>
+              <span class="trust-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Atlas earns £0 here — flat published fee, never a commission</span>
+            </div>
             <div id="partnerList"></div>
           </div>
         </div>
@@ -136,9 +148,9 @@
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
       blurb: "Send tuition and living costs at rates better than your bank's — and get a transfer receipt your visa officer will accept as financial evidence.",
       partners: [
-        { name: 'Wise', blurb: 'Mid-market rate, transparent fee shown before you send.', stat1: '0.4%', stat1Lbl: 'Fee', stat2: '1–2 days', stat2Lbl: 'Transfer time' },
-        { name: 'Western Union', blurb: 'Large transfer limits, widely accepted for CAS evidence.', stat1: '0.9%', stat1Lbl: 'Fee', stat2: 'Same day', stat2Lbl: 'Transfer time' },
-        { name: 'BookMyForex', blurb: 'India-based, doorstep documentation pickup available.', stat1: '0.6%', stat1Lbl: 'Fee', stat2: '1 day', stat2Lbl: 'Transfer time' }
+        { name: 'Wise', blurb: 'Mid-market rate, transparent fee shown before you send.', stat1: '0.4%', stat1Lbl: 'Fee', stat2: '1–2 days', stat2Lbl: 'Transfer time', feePct: 0.4, days: '1–2 days' },
+        { name: 'Western Union', blurb: 'Large transfer limits, widely accepted for CAS evidence.', stat1: '0.9%', stat1Lbl: 'Fee', stat2: 'Same day', stat2Lbl: 'Transfer time', feePct: 0.9, days: 'Same day' },
+        { name: 'BookMyForex', blurb: 'India-based, doorstep documentation pickup available.', stat1: '0.6%', stat1Lbl: 'Fee', stat2: '1 day', stat2Lbl: 'Transfer time', feePct: 0.6, days: '1 day' }
       ]
     },
     insurance: {
@@ -159,11 +171,11 @@
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>',
       blurb: "Collateral-free lenders that work with your university's cost of attendance, with sanction letters accepted as visa financial evidence.",
       partners: [
-        { name: 'Prodigy Finance', blurb: 'Collateral-free, income-share based repayment options.', stat1: '8.9%', stat1Lbl: 'From APR', stat2: '£90k', stat2Lbl: 'Max amount' },
-        { name: 'MPOWER Financing', blurb: 'No collateral or Indian co-signer required.', stat1: '9.9%', stat1Lbl: 'From APR', stat2: '£75k', stat2Lbl: 'Max amount' },
-        { name: 'HDFC Credila', blurb: 'India-based, collateral options for larger sanction amounts.', stat1: '10.5%', stat1Lbl: 'From APR', stat2: '£100k', stat2Lbl: 'Max amount' },
-        { name: 'Avanse', blurb: 'Fast sanction letters, useful ahead of CAS deadlines.', stat1: '10.8%', stat1Lbl: 'From APR', stat2: '£85k', stat2Lbl: 'Max amount' },
-        { name: 'Leap Finance', blurb: 'No-collateral loans built specifically for study-abroad students.', stat1: '11.2%', stat1Lbl: 'From APR', stat2: '£70k', stat2Lbl: 'Max amount' }
+        { name: 'Prodigy Finance', blurb: 'Collateral-free, income-share based repayment options.', stat1: '8.9%', stat1Lbl: 'From APR', stat2: '£90k', stat2Lbl: 'Max amount', apr: 8.9, maxAmount: 90000 },
+        { name: 'MPOWER Financing', blurb: 'No collateral or Indian co-signer required.', stat1: '9.9%', stat1Lbl: 'From APR', stat2: '£75k', stat2Lbl: 'Max amount', apr: 9.9, maxAmount: 75000 },
+        { name: 'HDFC Credila', blurb: 'India-based, collateral options for larger sanction amounts.', stat1: '10.5%', stat1Lbl: 'From APR', stat2: '£100k', stat2Lbl: 'Max amount', apr: 10.5, maxAmount: 100000 },
+        { name: 'Avanse', blurb: 'Fast sanction letters, useful ahead of CAS deadlines.', stat1: '10.8%', stat1Lbl: 'From APR', stat2: '£85k', stat2Lbl: 'Max amount', apr: 10.8, maxAmount: 85000 },
+        { name: 'Leap Finance', blurb: 'No-collateral loans built specifically for study-abroad students.', stat1: '11.2%', stat1Lbl: 'From APR', stat2: '£70k', stat2Lbl: 'Max amount', apr: 11.2, maxAmount: 70000 }
       ]
     }
   };
@@ -191,6 +203,85 @@
     document.getElementById('urgentCta').addEventListener('click', () => {
       document.querySelector('.partner-row')?.scrollIntoView({ behavior: AtlasUI.REDUCE ? 'auto' : 'smooth', block: 'center' });
     });
+  }
+
+  // ---------- financing comparison (atlas-portal-improvements.md §1) ----------
+  // real computed numbers (amortization / fee math), not a bare "N partners"
+  // link — recomputes live as the student changes amount/term.
+  function gbp(n){ return '£' + Math.round(n).toLocaleString('en-GB'); }
+
+  if (key === 'loans') {
+    const calcEl = document.getElementById('finCalc');
+    const tableEl = document.getElementById('finTable');
+    document.getElementById('finCompareCard').style.display = '';
+    document.getElementById('finCompareTitle').textContent = 'Compare the real cost of borrowing';
+    calcEl.innerHTML = `
+      <div class="field"><label class="field-label" for="loanAmount">Loan amount</label><input id="loanAmount" class="field-input" type="number" min="1000" step="1000" value="50000"></div>
+      <div class="field"><label class="field-label" for="loanYears">Term (years)</label><input id="loanYears" class="field-input" type="number" min="1" max="15" value="5"></div>
+    `;
+    function renderLoanTable(){
+      const amount = Math.max(1000, +document.getElementById('loanAmount').value || 50000);
+      const years = Math.max(1, +document.getElementById('loanYears').value || 5);
+      const n = years * 12;
+      const rows = c.partners.map(p => {
+        const capped = Math.min(amount, p.maxAmount);
+        const r = p.apr / 100 / 12;
+        const monthly = r === 0 ? capped / n : capped * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+        const total = monthly * n;
+        return { ...p, capped, monthly, total };
+      });
+      const cheapest = rows.reduce((a, b) => b.total < a.total ? b : a, rows[0]);
+      tableEl.innerHTML = `
+        <thead><tr><th>Lender</th><th>APR</th><th>Est. monthly</th><th>Est. total repayment</th></tr></thead>
+        <tbody>
+          ${rows.map(row => `
+            <tr class="${row === cheapest ? 'fin-best' : ''}">
+              <td><b>${row.name}</b>${row === cheapest ? '<span class="fin-best-tag">Lowest total</span>' : ''}${amount > row.maxAmount ? `<br><span style="font-size:11px; color:var(--ink-soft);">capped at ${gbp(row.maxAmount)} max</span>` : ''}</td>
+              <td>${row.apr}%</td>
+              <td>${gbp(row.monthly)}/mo</td>
+              <td><b>${gbp(row.total)}</b></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+    }
+    document.getElementById('loanAmount').addEventListener('input', renderLoanTable);
+    document.getElementById('loanYears').addEventListener('input', renderLoanTable);
+    renderLoanTable();
+  }
+
+  if (key === 'forex') {
+    const calcEl = document.getElementById('finCalc');
+    const tableEl = document.getElementById('finTable');
+    document.getElementById('finCompareCard').style.display = '';
+    document.getElementById('finCompareTitle').textContent = 'Compare the real cost of sending money';
+    calcEl.innerHTML = `
+      <div class="field"><label class="field-label" for="transferAmount">Amount to send (£)</label><input id="transferAmount" class="field-input" type="number" min="100" step="500" value="20000"></div>
+    `;
+    function renderForexTable(){
+      const amount = Math.max(100, +document.getElementById('transferAmount').value || 20000);
+      const rows = c.partners.map(p => {
+        const fee = amount * (p.feePct / 100);
+        return { ...p, fee, received: amount - fee };
+      });
+      const cheapest = rows.reduce((a, b) => b.fee < a.fee ? b : a, rows[0]);
+      tableEl.innerHTML = `
+        <thead><tr><th>Provider</th><th>Fee</th><th>Cost on ${gbp(amount)}</th><th>You receive</th><th>Transfer time</th></tr></thead>
+        <tbody>
+          ${rows.map(row => `
+            <tr class="${row === cheapest ? 'fin-best' : ''}">
+              <td><b>${row.name}</b>${row === cheapest ? '<span class="fin-best-tag">Cheapest</span>' : ''}</td>
+              <td>${row.feePct}%</td>
+              <td>${gbp(row.fee)}</td>
+              <td><b>${gbp(row.received)}</b></td>
+              <td>${row.days}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+    }
+    document.getElementById('transferAmount').addEventListener('input', renderForexTable);
+    renderForexTable();
   }
 
   document.getElementById('partnerList').innerHTML = c.partners.map(p => `
