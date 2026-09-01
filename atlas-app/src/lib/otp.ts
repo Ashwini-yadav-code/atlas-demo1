@@ -37,7 +37,6 @@ export async function requestOtp(identifier: string) {
 
   await prisma.otpCode.create({ data: { identifier, code, expiresAt } });
 
-  // eslint-disable-next-line no-console
   console.log(`[otp] code for ${identifier}: ${code} (expires in ${OTP_TTL_MINUTES}m)`);
 
   const isDev = process.env.NODE_ENV !== "production";

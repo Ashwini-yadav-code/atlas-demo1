@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -107,7 +108,7 @@ export function ShellChrome({
               style={{ appearance: "none", border: "none", background: "none" }}
             >
               <div className="avatar-ring">
-                <img src={userImage || "https://i.pravatar.cc/100?img=47"} alt={userName} />
+                <Image src={userImage || "https://i.pravatar.cc/100?img=47"} alt={userName} fill sizes="36px" style={{ objectFit: "cover" }} />
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="11" height="11"><path d="M6 9l6 6 6-6" /></svg>
             </button>

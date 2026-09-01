@@ -1,18 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Script from "next/script";
 
-export function ThemeToggle({ className = "icon-btn" }: { className?: string }) {
-  const [dark, setDark] = useState(false);
+function subscribeToTheme(callback: () => void) {
+  const observer = new MutationObserver(callback);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+}
+function getThemeSnapshot() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+function getServerThemeSnapshot() {
+  return false; // matches the hardcoded data-theme="light" in app/layout.tsx
+}
 
-  useEffect(() => {
-    setDark(document.documentElement.getAttribute("data-theme") === "dark");
-  }, []);
+export function ThemeToggle({ className = "icon-btn" }: { className?: string }) {
+  // Reads the <html> attribute (set synchronously pre-hydration by
+  // ThemeInitScript below) without an effect — see useIsMounted's doc
+  // comment for why useSyncExternalStore replaces the classic
+  // state+effect pair here.
+  const dark = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerThemeSnapshot);
 
   function toggle() {
     const next = !dark;
-    setDark(next);
     document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
     try {
       localStorage.setItem("atlas-theme", next ? "dark" : "light");
@@ -45,8 +56,15 @@ export function ThemeToggle({ className = "icon-btn" }: { className?: string }) 
  * inject this in <head> — a raw JSX <script> tag triggers a dev warning
  * ("scripts inside React components are never executed on the client")
  * even though it works, because it runs once during raw HTML parsing,
- * before React ever mounts to manage it. */
+ * before React ever mounts to manage it.
+ *
+ * eslint-disable-next-line: the no-before-interactive-script-outside-document
+ * rule predates the App Router and only recognizes this pattern when the
+ * <Script> JSX is written literally inline in app/layout.tsx. It IS there
+ * (imported and rendered in <head>, see app/layout.tsx) — this component
+ * just factors the script string out of that file. False positive. */
 export function ThemeInitScript() {
   const code = `(function(){try{var t=localStorage.getItem('atlas-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+  // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
   return <Script id="theme-init" strategy="beforeInteractive">{code}</Script>;
 }

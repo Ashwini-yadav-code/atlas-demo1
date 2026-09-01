@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useIsMounted } from "@/lib/useIsMounted";
 
 export function Drawer({
   open,
@@ -23,8 +24,7 @@ export function Drawer({
   // the whole subtree to re-render it, taking sibling markup down with it.
   // Gating on a post-mount flag makes the client's first render match the
   // server (both render nothing), then the portal appears one tick later.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsMounted();
 
   useEffect(() => {
     if (!open) return;

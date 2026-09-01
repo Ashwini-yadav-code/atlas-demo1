@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
@@ -160,7 +161,7 @@ export default async function HomePage() {
               {advisorLinks.map((link) => (
                 <Link key={link.id} href="/messages" className="row" style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="p-avatar">
-                    <img src={link.advisor.image ?? ""} alt={link.advisor.name} />
+                    <Image src={link.advisor.image || "https://i.pravatar.cc/100?img=47"} alt={link.advisor.name} fill sizes="40px" style={{ objectFit: "cover" }} />
                   </div>
                   <div className="row-label">
                     {link.advisor.jobTitle}

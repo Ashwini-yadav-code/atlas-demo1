@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
@@ -83,7 +84,13 @@ export default async function CommunityDetailPage({ params }: { params: Promise<
                 <h3>Written by</h3>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 20px 20px" }}>
-                <img src={item.authorImage ?? ""} alt="" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }} />
+                <Image
+                  src={item.authorImage || "https://i.pravatar.cc/100?img=47"}
+                  alt=""
+                  width={36}
+                  height={36}
+                  style={{ borderRadius: "50%", objectFit: "cover" }}
+                />
                 <div>
                   <b style={{ fontSize: 13.5 }}>{item.authorName}</b>
                   <span style={{ display: "block", fontSize: 12, color: "var(--ink-soft)" }}>{item.authorRole}</span>

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { computeUnlockedStages, STAGE_ORDER } from "@/lib/stage";
 import { formatDue } from "@/lib/format";
-import { TaskRow } from "@/components/TaskRow";
 import { JourneyBoard } from "@/components/JourneyBoard";
 
 const STAGE_LABEL: Record<string, string> = {

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { sendMessage } from "@/lib/actions";
+
+const DEFAULT_AVATAR = "https://i.pravatar.cc/100?img=47";
 
 type Thread = {
   id: string;
@@ -59,7 +62,7 @@ export function MessagesView({ threads }: { threads: Thread[] }) {
               onClick={() => { setActiveId(t.id); setChatOpen(true); }}
             >
               <div className="p-avatar" style={{ width: 42, height: 42, flex: "none" }}>
-                <img src={t.advisor.image ?? ""} alt="" />
+                <Image src={t.advisor.image || DEFAULT_AVATAR} alt="" fill sizes="42px" style={{ objectFit: "cover" }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 700 }}>{t.advisor.name}</div>
@@ -84,7 +87,7 @@ export function MessagesView({ threads }: { threads: Thread[] }) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
               </div>
               <div className="p-avatar" style={{ width: 38, height: 38 }}>
-                <img src={active.advisor.image ?? ""} alt="" />
+                <Image src={active.advisor.image || DEFAULT_AVATAR} alt="" fill sizes="38px" style={{ objectFit: "cover" }} />
               </div>
               <div>
                 <b style={{ fontSize: 14.5, display: "block" }}>{active.advisor.name}</b>
@@ -96,7 +99,7 @@ export function MessagesView({ threads }: { threads: Thread[] }) {
                 <div key={m.id} className={`bubble-row-x${m.own ? " own" : ""}`}>
                   {!m.own && (
                     <div className="p-avatar" style={{ width: 28, height: 28, flex: "none" }}>
-                      <img src={active.advisor.image ?? ""} alt="" />
+                      <Image src={active.advisor.image || DEFAULT_AVATAR} alt="" fill sizes="28px" style={{ objectFit: "cover" }} />
                     </div>
                   )}
                   <div className="bubble-x">{m.body}</div>
