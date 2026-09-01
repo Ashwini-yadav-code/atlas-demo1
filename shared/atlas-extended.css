@@ -97,6 +97,15 @@ a.btn{ text-decoration:none; }
    Sidebar rail stays fixed; the topbar's pill-nav is replaced by a
    ← Back control + one-line breadcrumb. Page itself does the
    slide-in-from-right via AtlasUI.boot({ enter:'slide' }). */
+.topbar-back{
+  /* Undeclared before this fix, .topbar-back fell back to block layout:
+     back-btn and breadcrumb stacked into one tall column, which .topbar's
+     align-items:center then centered as a unit — pulling the back-btn pill
+     up above the "atlas" logo's own center instead of sitting level with
+     it (the way .pillnav does on every other page). Row layout keeps both
+     children on the logo's line instead. */
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
 .back-btn{
   display:inline-flex; align-items:center; gap:7px;
   font-family:'Montserrat', sans-serif; font-size:13.5px; font-weight:700; color:var(--ink);
