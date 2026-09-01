@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { PartnerCompareButton } from "@/components/PartnerCompareButton";
 import type { ServiceCategory } from "@/generated/prisma/enums";
 
 const LABEL: Record<string, string> = {
@@ -72,9 +73,7 @@ export default async function ServiceCategoryPage({ params }: { params: Promise<
                   <small>{p.stat2Label}</small>
                 </div>
               </div>
-              <button type="button" className="btn btn-secondary btn-sm">
-                Compare
-              </button>
+              <PartnerCompareButton partnerId={p.id} websiteUrl={p.websiteUrl} />
             </div>
           ))}
         </div>

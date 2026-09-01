@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 const OTP_TTL_MINUTES = 10;
+const RATE_LIMIT_WINDOW_MINUTES = 15;
+const RATE_LIMIT_MAX_REQUESTS = 5;
 
 function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -16,7 +18,20 @@ function generateCode(): string {
  * end-to-end; `devCode` must be stripped once a real provider is wired in
  * (search this file for the one place it's read).
  */
+export class RateLimitedError extends Error {
+  constructor() {
+    super("Too many codes requested. Wait a few minutes and try again.");
+    this.name = "RateLimitedError";
+  }
+}
+
 export async function requestOtp(identifier: string) {
+  // DB-backed rate limit — no Redis/edge KV in this environment, but the
+  // OtpCode table already has everything needed to count recent requests.
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+  const recentCount = await prisma.otpCode.count({ where: { identifier, createdAt: { gt: windowStart } } });
+  if (recentCount >= RATE_LIMIT_MAX_REQUESTS) throw new RateLimitedError();
+
   const code = generateCode();
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 

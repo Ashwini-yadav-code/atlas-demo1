@@ -114,6 +114,7 @@ model User {
   tasks         Task[]
   notifications Notification[]
   advisorLinks  StudentAdvisor[]
+  partnerClicks PartnerClick[]
   threads       MessageThread[]
   messages      Message[]
 
@@ -249,7 +250,21 @@ model ServicePartner {
   priorityWhy  String?
   websiteUrl   String?
 
+  clicks PartnerClick[]
+
   createdAt DateTime @default(now())
+}
+
+/// Click-through tracking (checklist §3: "so Services usage is measurable,
+/// and partner relationships can be reported on"). Logged server-side when
+/// a student clicks through to a partner, surfaced in /admin.
+model PartnerClick {
+  id        String         @id @default(cuid())
+  partnerId String
+  partner   ServicePartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
 }
 
 // ---------- community ----------

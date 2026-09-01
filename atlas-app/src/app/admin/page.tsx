@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboard() {
-  const [users, applications, courses, partners, community, unread] = await Promise.all([
+  const [users, applications, courses, partners, community, unread, partnerClicks] = await Promise.all([
     prisma.user.count({ where: { role: "STUDENT" } }),
     prisma.application.count(),
     prisma.course.count(),
     prisma.servicePartner.count(),
     prisma.communityContent.count({ where: { status: "PUBLISHED" } }),
     prisma.notification.count({ where: { isRead: false } }),
+    prisma.partnerClick.count(),
   ]);
 
   const onboarded = await prisma.user.count({ where: { role: "STUDENT", onboarded: true } });
@@ -22,6 +23,7 @@ export default async function AdminDashboard() {
     ["Service partners", partners],
     ["Published community items", community],
     ["Unread notifications sent", unread],
+    ["Service click-throughs", partnerClicks],
   ] as const;
 
   return (

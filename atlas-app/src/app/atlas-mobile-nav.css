@@ -21,6 +21,11 @@
 .pillnav a.active{ background:var(--accent); color:var(--panel); }
 .pillnav a:not(.active):hover{ color:var(--ink); }
 
+/* same story for .side-btn — the static prototype only ever used it on
+   <div role="button">; this app uses real <button> for a11y, which needs
+   the usual browser-chrome reset since .side-btn itself doesn't have one */
+button.side-btn{ appearance:none; border:none; background:none; font:inherit; padding:0; }
+
 .top-right{ position:relative; }
 .account-menu{
   display:none; position:absolute; top:calc(100% + 10px); right:0;

@@ -164,6 +164,13 @@ export async function updateProfile(raw: z.infer<typeof profileSchema>) {
   return { ok: true };
 }
 
+/* ---------- service partner click-through tracking ---------- */
+
+export async function logPartnerClick(partnerId: string) {
+  const user = await requireUser();
+  await prisma.partnerClick.create({ data: { partnerId, userId: user.id } });
+}
+
 /* ---------- messaging ---------- */
 
 export async function sendMessage(threadId: string, body: string) {

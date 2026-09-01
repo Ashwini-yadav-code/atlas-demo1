@@ -4,7 +4,10 @@ import { DeleteButton } from "@/components/admin/DeleteButton";
 import { togglePartnerPriority, deletePartner } from "@/lib/admin-actions";
 
 export default async function AdminServicesPage() {
-  const partners = await prisma.servicePartner.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
+  const partners = await prisma.servicePartner.findMany({
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+    include: { _count: { select: { clicks: true } } },
+  });
 
   return (
     <div className="card">
@@ -17,6 +20,7 @@ export default async function AdminServicesPage() {
             <tr>
               <th>Category</th>
               <th>Partner</th>
+              <th>Click-throughs</th>
               <th>Priority</th>
               <th></th>
             </tr>
@@ -26,6 +30,7 @@ export default async function AdminServicesPage() {
               <tr key={p.id}>
                 <td>{p.category}</td>
                 <td>{p.name}</td>
+                <td>{p._count.clicks}</td>
                 <td>
                   <ToggleButton action={togglePartnerPriority} id={p.id} on={p.isPriority} onLabel="Priority" offLabel="Standard" />
                 </td>

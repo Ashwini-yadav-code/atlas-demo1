@@ -43,20 +43,35 @@ export function TaskRow({
 
   const className = variant === "task" ? "task" + (done ? " is-done" : "") : "row" + (done ? " is-done" : "");
 
+  const toggleAriaLabel = done ? `Mark incomplete: "${label}"` : `Mark complete: "${label}"`;
+
   return (
     <>
-      <div className={className} style={{ cursor: "pointer" }} onClick={() => setDrawerOpen(true)}>
+      <div
+        className={className}
+        style={{ cursor: "pointer" }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open task: ${label}`}
+        onClick={() => setDrawerOpen(true)}
+        onKeyDown={(e) => {
+          // the checkbox is a real nested <button> — let its own native
+          // Enter/Space activation run without also opening the drawer
+          if ((e.target as HTMLElement).closest(".mini-btn")) return;
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDrawerOpen(true); }
+        }}
+      >
         {variant === "task" && (
           <div className="task-top">
             <div className="task-actions">
-              <button type="button" className={`mini-btn${done ? " done" : ""}`} disabled={isPending} onClick={onToggle}>
+              <button type="button" className={`mini-btn${done ? " done" : ""}`} aria-label={toggleAriaLabel} disabled={isPending} onClick={onToggle}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>
               </button>
             </div>
           </div>
         )}
         {variant === "row" && (
-          <button type="button" className={`mini-btn${done ? " done" : ""}`} disabled={isPending} onClick={onToggle}>
+          <button type="button" className={`mini-btn${done ? " done" : ""}`} aria-label={toggleAriaLabel} disabled={isPending} onClick={onToggle}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>
           </button>
         )}
