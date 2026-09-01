@@ -85,9 +85,12 @@
         <div class="view active" id="detailView">
           <div class="j-head reveal">
             <div><h1>Calendar</h1><p>Every deadline and event from your Journey board, in one place.</p></div>
-            <div class="chip-row" id="calTabs" style="margin:0;">
-              <button class="chip active" data-v="month">Month</button>
-              <button class="chip" data-v="list">List</button>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div class="chip-row" id="calTabs" style="margin:0;">
+                <button class="chip active" data-v="month">Month</button>
+                <button class="chip" data-v="list">List</button>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="icsExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>Add to your calendar</button>
             </div>
           </div>
 
@@ -144,6 +147,45 @@
     if (items.length) cell.addEventListener('click', () => openDay(day, items));
     grid.appendChild(cell);
   }
+
+  /* ---------- ICS export (atlas-portal-improvements.md §3) ----------
+     A real, valid .ics file built from the same EVENTS data the
+     calendar renders — every deadline lands in the student's own
+     calendar app, not just inside Atlas. */
+  function buildIcs(){
+    const YEAR = 2026, MONTH = 9; // September 2026, matching the month view above
+    const pad = n => String(n).padStart(2, '0');
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Atlas//Student Journey//EN', 'CALSCALE:GREGORIAN'];
+    Object.keys(EVENTS).forEach(day => {
+      EVENTS[day].forEach((item, i) => {
+        const dateStr = `${YEAR}${pad(MONTH)}${pad(+day)}`;
+        lines.push(
+          'BEGIN:VEVENT',
+          `UID:atlas-${dateStr}-${i}@atlas`,
+          `DTSTAMP:${stamp}`,
+          `DTSTART;VALUE=DATE:${dateStr}`,
+          `DTEND;VALUE=DATE:${dateStr}`,
+          `SUMMARY:[Atlas] ${item.title}`,
+          `DESCRIPTION:${item.type === 'event' ? 'Community event' : 'Journey task'} synced from your Atlas calendar.`,
+          'END:VEVENT'
+        );
+      });
+    });
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  }
+  document.getElementById('icsExport').addEventListener('click', () => {
+    const blob = new Blob([buildIcs()], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'atlas-journey.ics';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
 
   function renderList(){
     const days = Object.keys(EVENTS).map(Number).sort((a, b) => a - b);

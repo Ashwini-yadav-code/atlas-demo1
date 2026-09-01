@@ -1467,6 +1467,26 @@
             </div>
           </div>
           <div class="empty" id="commEmpty"><b>Nothing matches that search</b>Try a shorter phrase, or clear the field to see everything.</div>
+
+          <div class="card reveal" style="margin-top:20px;">
+            <div class="panel-head"><h3>Scholarships you may qualify for</h3></div>
+            <div class="list-card" style="margin:0 20px 20px;">
+              <div class="row"><div class="p-avatar" style="background:var(--green-soft); display:flex; align-items:center; justify-content:center; color:var(--green); font-weight:800; font-size:12px;">GB</div><div class="row-label">GREAT Scholarships (India)<br><span style="color:var(--ink-soft); font-weight:500;">£10,000 · Data Science &amp; STEM, Manchester-eligible</span></div><div class="due soon">Due 30 Sept</div></div>
+              <div class="row"><div class="p-avatar" style="background:var(--blue-soft); display:flex; align-items:center; justify-content:center; color:var(--blue); font-weight:800; font-size:12px;">CS</div><div class="row-label">Chevening-adjacent dept. awards<br><span style="color:var(--ink-soft); font-weight:500;">£2,000–£5,000 · merit-based, most Russell Group unis</span></div><div class="due">Rolling</div></div>
+              <div class="row"><div class="p-avatar" style="background:var(--gold-soft); display:flex; align-items:center; justify-content:center; color:#a3760a; font-weight:800; font-size:12px;">RS</div><div class="row-label">Royal Statistical Society bursary<br><span style="color:var(--ink-soft); font-weight:500;">£1,500 · accredited courses (Manchester qualifies)</span></div><div class="due">Due 15 Oct</div></div>
+            </div>
+            <p style="font-size:11.5px; color:var(--ink-soft); padding:0 20px 18px;">Aggregated from public university and government sources — Atlas doesn't administer or take a cut of any of these.</p>
+          </div>
+
+          <div class="card reveal" style="margin-top:20px; margin-bottom:20px;">
+            <div class="panel-head"><h3>Ask an alumni</h3></div>
+            <p style="font-size:13px; color:var(--ink-soft); padding:0 20px 14px;">Matched with people who actually did your course, in your city — not a generic forum.</p>
+            <div class="list-card" id="alumniQa" style="margin:0 20px 16px;"></div>
+            <div style="display:flex; gap:10px; padding:0 20px 20px;">
+              <input class="field-input" id="alumniAsk" placeholder="Ask something only someone who's been there would know…" style="flex:1;">
+              <button type="button" class="btn btn-primary" id="alumniAskBtn">Ask</button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -1680,6 +1700,39 @@
     });
     renderAftercare(30);
   }
+
+  /* ---------- alumni/peer Q&A (atlas-portal-improvements.md §3) ----------
+     Matched to the student's own course + destination city, not a
+     generic forum — the seed Qs below are already scoped that way. */
+  const ALUMNI_QA = [
+    { name: 'Rohan V.', tag: 'MSc Data Science, Manchester · graduated 2025', q: 'Is the RSS accreditation actually worth mentioning in job applications?', a: "Yes — two recruiters specifically asked about it in interviews. It's a real signal to UK employers, not just a line on the syllabus." },
+    { name: 'Ishita P.', tag: 'MSc Data Science, Manchester · current student', q: "How tight is the housing market near campus in September?", a: 'Tight but manageable if you start looking in July. SpareRoom and the uni-approved list both moved fast for me — book viewings before you land if you can.' }
+  ];
+  const alumniQaEl = document.getElementById('alumniQa');
+  function renderAlumniQa(){
+    alumniQaEl.innerHTML = ALUMNI_QA.map(item => `
+      <div class="row" style="align-items:flex-start; cursor:default;">
+        <div class="p-avatar" style="flex:none;"><img src="https://i.pravatar.cc/100?img=${item.img || 25}" alt="${item.name}"></div>
+        <div style="flex:1; min-width:0;">
+          <div class="row-label" style="white-space:normal;"><b>${item.name}</b> <span style="color:var(--ink-soft); font-weight:500; font-size:12px;">· ${item.tag}</span></div>
+          <div style="font-size:13.5px; font-weight:600; margin-top:4px;">${item.q}</div>
+          <div style="font-size:13px; color:var(--ink-soft); margin-top:4px; line-height:1.5;">${item.a || '<i>Waiting on a matched alumni to answer — usually within a day or two.</i>'}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderAlumniQa();
+  document.getElementById('alumniAskBtn')?.addEventListener('click', () => {
+    const input = document.getElementById('alumniAsk');
+    const text = input.value.trim();
+    if (!text) return;
+    ALUMNI_QA.unshift({ name: 'You', tag: 'MSc Data Science, Manchester · your question', q: text, a: null, img: 47 });
+    input.value = '';
+    renderAlumniQa();
+  });
+  document.getElementById('alumniAsk')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('alumniAskBtn').click();
+  });
 
   /* ---------- community search ---------- */
   const commSearch = document.getElementById('commSearch');

@@ -141,6 +141,18 @@
                 <div class="panel-head"><h3>Campus &amp; city</h3></div>
                 <div class="detail-body" style="padding:0 20px 20px;" id="cityBody"></div>
               </div>
+
+              <div class="card reveal" id="colCard" style="display:none;">
+                <div class="panel-head"><h3>Monthly budget estimate</h3></div>
+                <div id="colBody" style="padding:0 20px 20px;"></div>
+              </div>
+
+              <div class="card reveal" id="offerCompareCard" style="display:none;">
+                <div class="panel-head"><h3>Compare your offers</h3></div>
+                <div class="table-scroll">
+                  <table class="compare-table" id="offerCompareTable"></table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -164,7 +176,8 @@
       city: [
         "Manchester is one of the UK's largest student cities, with a large Indian and South Asian student community already established near campus.",
         "Direct trains to Manchester Airport (25 min) and London (2h10). Typical shared housing near campus runs £550–£750/month."
-      ]
+      ],
+      col: { rentLow: 550, rentHigh: 750, food: 220, transport: 55, bills: 65 }
     },
     ucl: {
       name: 'UCL', course: 'MSc Data Science', match: 91, matchClass: 'match-high',
@@ -178,7 +191,8 @@
       city: [
         "London is the most expensive option on your shortlist — budget £900–£1,300/month for shared housing near most campuses.",
         "Unmatched access to internships, events and the largest South Asian community of any UK city."
-      ]
+      ],
+      col: { rentLow: 900, rentHigh: 1300, food: 280, transport: 90, bills: 75 }
     },
     leeds: {
       name: 'University of Leeds', course: 'MSc Data Science', match: 84, matchClass: 'match-mid',
@@ -192,7 +206,8 @@
       city: [
         "Leeds has one of the UK's lowest costs of living among major student cities — shared housing typically runs £450–£600/month.",
         "A 15-minute walk covers most of campus and the city centre, with direct trains to Manchester (55 min) and London (2h20)."
-      ]
+      ],
+      col: { rentLow: 450, rentHigh: 600, food: 200, transport: 45, bills: 60 }
     },
     edinburgh: {
       name: 'University of Edinburgh', course: 'MSc Data Science', match: 78, matchClass: 'match-mid',
@@ -206,7 +221,8 @@
       city: [
         "Edinburgh's student population is smaller and more concentrated than Manchester or Leeds, with most housing within a 30-minute walk of campus.",
         "Higher cost of living than the north of England — budget £650–£850/month for shared housing."
-      ]
+      ],
+      col: { rentLow: 650, rentHigh: 850, food: 230, transport: 55, bills: 65 }
     },
     birmingham: {
       name: 'University of Birmingham', course: 'MSc Data Science', match: 81, matchClass: 'match-mid',
@@ -220,7 +236,8 @@
       city: [
         "Birmingham is the UK's second-largest city with one of its largest South Asian communities — several dedicated Indian grocery and food districts near campus.",
         "Lower cost of living than London or Manchester; shared housing typically £500–£650/month."
-      ]
+      ],
+      col: { rentLow: 500, rentHigh: 650, food: 210, transport: 50, bills: 60 }
     },
     warwick: {
       name: 'University of Warwick', course: 'MSc Data Science', match: 88, matchClass: 'match-high',
@@ -234,7 +251,8 @@
       city: [
         "Warwick's campus sits between Coventry and Leamington Spa, with most student housing on or immediately around campus.",
         "Frequent direct trains to Birmingham (25 min) and London (1h10); typical shared housing runs £480–£620/month."
-      ]
+      ],
+      col: { rentLow: 480, rentHigh: 620, food: 210, transport: 50, bills: 60 }
     }
   };
 
@@ -257,6 +275,25 @@
   document.getElementById('whyMatchText').textContent = d.why;
   document.getElementById('aboutBody').innerHTML = d.about.map(p => `<p>${p}</p>`).join('');
   document.getElementById('cityBody').innerHTML = d.city.map(p => `<p>${p}</p>`).join('');
+
+  // cost-of-living estimate (atlas-portal-improvements.md §3) — surfaced
+  // once an offer is accepted, tied to the actual destination city rather
+  // than a generic "budget for the UK" number.
+  if (d.status === 'accepted' && d.col) {
+    const c = d.col;
+    const rentMid = Math.round((c.rentLow + c.rentHigh) / 2);
+    const total = rentMid + c.food + c.transport + c.bills;
+    document.getElementById('colCard').style.display = '';
+    document.getElementById('colBody').innerHTML = `
+      <div class="fact-grid" style="margin-bottom:14px;">
+        <div class="card"><div class="fact-label">Rent (shared)</div><div class="fact-value">£${c.rentLow}–${c.rentHigh}</div></div>
+        <div class="card"><div class="fact-label">Food</div><div class="fact-value">~£${c.food}</div></div>
+        <div class="card"><div class="fact-label">Transport</div><div class="fact-value">~£${c.transport}</div></div>
+        <div class="card"><div class="fact-label">Phone &amp; bills</div><div class="fact-value">~£${c.bills}</div></div>
+      </div>
+      <p style="font-size:13px; color:var(--ink-soft);">That's roughly <b style="color:var(--ink);">£${total}/month</b> in ${d.name.replace('University of ', '')} on a typical shared-housing budget — figures are estimates for comparison, not a guarantee, and don't include tuition.</p>
+    `;
+  }
 
   const statusPill = document.getElementById('uniStatus');
   const shortlistBtn = document.getElementById('shortlistBtn');
@@ -301,6 +338,28 @@
     const u = DATA[k];
     return `<tr class="${k === key ? 'this-row' : ''}"><td>${u.name}</td><td><span class="match-pill ${u.matchClass}">${u.match}%</span></td><td>${u.fees}</td><td>${u.deadline}</td><td><span class="status-pill ${u.status === 'not-applied' ? 'draft' : 'live'}">${u.statusLabel}</span></td></tr>`;
   }).join('');
+
+  // offer comparison (atlas-portal-improvements.md §3) — once a student
+  // holds 2+ real offers (not just shortlisted), a proper side-by-side
+  // instead of tracking each application in isolation.
+  const offerKeys = Object.keys(DATA).filter(k => DATA[k].status === 'accepted' || DATA[k].status === 'offer');
+  if (offerKeys.length >= 2 && (d.status === 'accepted' || d.status === 'offer')) {
+    document.getElementById('offerCompareCard').style.display = '';
+    const rows = [
+      { label: 'Status', get: u => `<span class="status-pill ${u.status === 'accepted' ? 'live' : 'draft'}">${u.statusLabel}</span>` },
+      { label: 'Tuition/yr', get: u => u.fees },
+      { label: 'Est. cost of living/mo', get: u => u.col ? `£${Math.round((u.col.rentLow + u.col.rentHigh) / 2) + u.col.food + u.col.transport + u.col.bills}` : '—' },
+      { label: 'Entry requirement', get: u => u.entry },
+      { label: 'IELTS', get: u => u.ielts },
+      { label: 'Course focus', get: u => u.about[0].split('.')[0] + '.', wrap: true }
+    ];
+    document.getElementById('offerCompareTable').innerHTML = `
+      <thead><tr><th></th>${offerKeys.map(k => `<th>${DATA[k].name}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr><td style="color:var(--ink-soft); font-weight:600;">${r.label}</td>${offerKeys.map(k => `<td${r.wrap ? ' style="white-space:normal; max-width:280px;"' : ''}>${r.get(DATA[k])}</td>`).join('')}</tr>`).join('')}
+      </tbody>
+    `;
+  }
 
   document.getElementById('backBtn').addEventListener('click', () => {
     if (document.referrer && document.referrer.includes(location.host)) history.back();

@@ -244,6 +244,13 @@ a.btn{ text-decoration:none; }
 }
 .trust-tag svg{ width:12px; height:12px; flex:none; }
 
+/* generic small pill badge — "on"/earned vs default/locked. Was local to
+   catalogue.html's "Shortlisted" tag; promoted here so profile.html's
+   milestone badges (and anything else) can reuse the same visual language
+   instead of re-declaring it. */
+.cat-badge{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--tint); color:var(--ink-soft); }
+.cat-badge.on{ background:var(--green-soft); color:var(--green); }
+
 /* per-service-card money-relationship line — who provides it + that Atlas
    earns nothing, right on the card, not buried in the Services banner */
 .svc-earn{

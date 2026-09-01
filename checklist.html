@@ -84,6 +84,11 @@
             </div>
             <div class="list-card" id="stageList" style="margin:0 20px 20px;"></div>
           </div>
+
+          <div class="card reveal" id="refusalCard" style="margin-top:18px; display:none;">
+            <div class="panel-head" style="padding:18px 20px 4px;"><h3>If your visa is refused</h3></div>
+            <p style="font-size:13px; color:var(--ink-soft); line-height:1.7; padding:0 20px 20px;">This isn't a dead end. A refusal comes with a written reason from UKVI — the same day you get it, message James O. and he'll tell you within 48 hours whether it's a reapply-immediately case (most common: a documentation gap) or worth a formal appeal. Deposit refund policies vary by university; ask your application advisor before you reapply anywhere else. You are not on your own for this, and it doesn't mean starting over from zero.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -150,6 +155,7 @@
     document.getElementById('stageTitle').textContent = stage.label;
     const done = stage.items.filter(i => i.done).length;
     document.getElementById('stageCount').textContent = `${done}/${stage.items.length}`;
+    document.getElementById('refusalCard').style.display = activeStage === 'visa' ? '' : 'none';
     document.getElementById('stageList').innerHTML = stage.items.map((item, i) => `
       <div class="row cl-row ${NOTES[activeStage + i] ? 'has-note' : ''}" data-i="${i}">
         <div class="mini-btn ${item.done ? 'done' : ''}" data-toggle="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
