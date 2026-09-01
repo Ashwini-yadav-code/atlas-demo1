@@ -193,9 +193,13 @@
     drawerEl.classList.add('on');
     if (backdropEl) backdropEl.classList.add('on');
     document.body.style.overflow = 'hidden';
-    if (!skipGSAP && !REDUCE) {
-      gsap.fromTo(drawerEl, { x: 40 }, { x: 0, duration: .3, ease: 'power3.out' });
-    }
+    // No GSAP animation here on purpose: the CSS transition on .drawer
+    // already slides it in/out via the .on class (see atlas-extended.css),
+    // both open AND close. A gsap.fromTo used to run on open, but GSAP
+    // leaves its inline transform on the element after the tween finishes
+    // — that inline style outranks the stylesheet's transform:translateX(100%)
+    // close rule, so removing .on later did nothing visible: the drawer
+    // stayed on-screen no matter how many times close was clicked.
     const onKey = (e) => { if (e.key === 'Escape') closeDrawer(drawerEl, backdropEl); };
     drawerEl._escHandler = onKey;
     document.addEventListener('keydown', onKey);
