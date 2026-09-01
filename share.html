@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<!-- deliberately NO shared/atlas-auth-gate.js — this page is the one screen
+     in the product meant to work with no session at all. A parent opening
+     this link should never hit a login wall. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progress — shared from Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  body{ min-height:100vh; }
+  .share-wrap{ max-width:760px; margin:0 auto; padding:32px 20px 60px; }
+  .share-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; }
+  .share-badge{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:700; color:var(--ink-soft);
+    background:var(--card); border:1px solid var(--line); border-radius:999px;
+    padding:8px 14px;
+  }
+  .share-badge svg{ width:14px; height:14px; }
+  .share-row{ display:flex; align-items:center; gap:12px; padding:12px 16px; }
+  .share-row .row-label{ flex:1; }
+  .share-row .due{ font-size:12px; color:var(--ink-soft); font-weight:600; white-space:nowrap; }
+  .share-row .due.soon{ color:var(--coral); }
+  .share-check{
+    width:22px; height:22px; border-radius:7px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--line); color:transparent;
+  }
+  .share-check.done{ background:var(--green); border-color:var(--green); color:#fff; }
+  .share-check svg{ width:13px; height:13px; }
+  .share-stage-head{ font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; padding:16px 20px 8px; }
+  .share-stage-head:first-child{ padding-top:4px; }
+</style>
+</head>
+<body>
+
+  <div class="share-wrap">
+    <div class="share-top reveal">
+      <div class="brand">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 21h20L12 2z"/><path d="M12 9l4.5 9h-9L12 9z" opacity=".5"/></svg></span>
+        atlas
+      </div>
+      <span class="share-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg>Read-only — nothing here can be edited</span>
+    </div>
+
+    <div class="card reveal" style="padding:22px 24px; margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">Shared progress for</div>
+      <h1 style="font-family:'Montserrat',sans-serif; font-size:24px; font-weight:800; letter-spacing:-.01em;" id="shareStudentName">Harman Sidhu</h1>
+      <p style="color:var(--ink-soft); font-size:13.5px; margin-top:4px;" id="shareStudentCourse">MSc Data Science · University of Manchester</p>
+      <p style="font-size:12px; color:var(--ink-faint); margin-top:14px; line-height:1.5;">This link shows stage progress and document checklist only — no messages, no personal details beyond what's on this page, and no way to make changes from here. Atlas never asks you to log in to view it.</p>
+    </div>
+
+    <div class="card accent-dark stage-rail reveal" style="margin-bottom:20px;">
+      <div class="stepper">
+        <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Applied</div></div>
+        <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Offer</div></div>
+        <div class="step done"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div><div class="step-lbl">Accepted</div></div>
+        <div class="step now"><div class="step-line"></div><div class="step-dot">4</div><div class="step-lbl">Visa</div></div>
+        <div class="step locked"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div class="step-lbl">Pre-departure</div><div class="step-note">Unlocks on visa approval</div></div>
+        <div class="step locked"><div class="step-line"></div><div class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div class="step-lbl">Arrival</div><div class="step-note">Unlocks 7 days before travel</div></div>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <div class="panel-head"><h3>Document checklist</h3><span style="font-size:12.5px; color:var(--ink-soft); font-weight:600;" id="shareTotal">7/15 complete</span></div>
+      <div id="shareChecklist"></div>
+    </div>
+
+    <p style="text-align:center; font-size:12px; color:var(--ink-faint); margin-top:26px;">Shared from Atlas — a free platform for Indian students studying in the UK. Atlas earns nothing from this link, or from anything on it.</p>
+  </div>
+
+<script>
+(function(){
+  const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const skipGSAP = typeof gsap === 'undefined' || !window.gsap;
+
+  // same STAGES data checklist.html uses — kept read-only and non-interactive
+  // here on purpose (see share.html's whole reason for existing: view, not edit).
+  const STAGES = [
+    { label: 'Shortlist', items: [
+      { label: 'Shortlist confirmed with advisor', due: 'Done 28 Jul', done: true },
+      { label: 'SOP reviewed, ready to submit', due: 'Done 30 Jul', done: true }
+    ]},
+    { label: 'Applications', items: [
+      { label: 'Personal statement submitted', due: '2 Aug', done: true },
+      { label: 'Academic references uploaded', due: '5 Aug', done: true },
+      { label: 'UCAS application fee paid', due: '5 Aug', done: true },
+      { label: 'Offer received — University of Manchester', due: '12 Aug', done: true },
+      { label: 'Offer accepted — deposit paid', due: '18 Aug', done: true }
+    ]},
+    { label: 'Visa & docs', items: [
+      { label: 'CAS number requested', due: 'Due 2 Sept', done: false },
+      { label: 'Financial evidence check', due: 'Due 4 Sept', done: false },
+      { label: 'Visa biometrics appointment', due: 'Due 6 Sept', done: false },
+      { label: 'TB test certificate', due: 'Due 10 Sept', done: false }
+    ]},
+    { label: 'After the visa', items: [
+      { label: 'Housing shortlist', due: 'Unlocks on visa approval', done: false },
+      { label: 'Bank account setup', due: 'Unlocks on visa approval', done: false },
+      { label: 'SIM & mobile plan', due: 'Unlocks on visa approval', done: false },
+      { label: 'Travel insurance', due: 'Unlocks on visa approval', done: false }
+    ]}
+  ];
+
+  const done = STAGES.flatMap(s => s.items).filter(i => i.done).length;
+  const total = STAGES.flatMap(s => s.items).length;
+  document.getElementById('shareTotal').textContent = `${done}/${total} complete`;
+
+  document.getElementById('shareChecklist').innerHTML = STAGES.map(stage => `
+    <div class="share-stage-head">${stage.label}</div>
+    ${stage.items.map(item => `
+      <div class="share-row">
+        <div class="share-check ${item.done ? 'done' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="row-label">${item.label}</div>
+        <div class="due ${item.due.startsWith('Due') ? 'soon' : ''}">${item.due}</div>
+      </div>
+    `).join('')}
+  `).join('');
+
+  if (!skipGSAP && !REDUCE) {
+    gsap.fromTo('.reveal', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: .5, ease: 'power3.out', stagger: .08 });
+  }
+})();
+</script>
+</body>
+</html>

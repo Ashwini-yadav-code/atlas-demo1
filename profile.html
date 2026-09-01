@@ -170,6 +170,19 @@
               </div>
             </div>
 
+            <div class="card pf-section reveal">
+              <h3>Share progress with a parent</h3>
+              <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-bottom:14px;">A read-only link to your stage progress and document checklist — no login needed on their end, and no edit access. Nothing else on your account is visible.</p>
+              <div class="field">
+                <label class="field-label" for="shareLink">Shareable link</label>
+                <div style="display:flex; gap:10px;">
+                  <input id="shareLink" class="field-input" readonly value="" style="flex:1;">
+                  <button type="button" class="btn btn-secondary" id="copyShareLink" style="flex:none;">Copy link</button>
+                </div>
+              </div>
+              <p class="field-help muted" id="shareCopiedNote" style="margin-top:8px; visibility:hidden;">Link copied.</p>
+            </div>
+
             <div class="pf-actions reveal">
               <button type="submit" class="btn btn-primary">Save changes</button>
               <button type="button" class="btn btn-secondary">Cancel</button>
@@ -245,6 +258,40 @@
     try { localStorage.removeItem('atlas-session'); } catch (e) {}
     location.href = 'auth.html';
   });
+
+  /* ---------- parent-visible read-only progress link (atlas-portal-improvements.md §2) ----------
+     A stable-per-browser token so the link doesn't change every reload —
+     share.html itself needs no session (see shared/atlas-auth-gate.js,
+     which explicitly excludes it), so this is real "no login on their
+     end" behavior, not just a claim in the copy above. */
+  (function(){
+    const shareInput = document.getElementById('shareLink');
+    const copyBtn = document.getElementById('copyShareLink');
+    const copiedNote = document.getElementById('shareCopiedNote');
+    if (!shareInput) return;
+    let token;
+    try {
+      token = localStorage.getItem('atlas-share-token');
+      if (!token) {
+        token = Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('atlas-share-token', token);
+      }
+    } catch (e) {
+      token = 'demo';
+    }
+    shareInput.value = `${location.origin}${location.pathname.replace(/profile\.html$/, '')}share.html?t=${token}`;
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(shareInput.value);
+      } catch (e) {
+        shareInput.select();
+        document.execCommand('copy');
+      }
+      copiedNote.style.visibility = 'visible';
+      clearTimeout(copyBtn._t);
+      copyBtn._t = setTimeout(() => { copiedNote.style.visibility = 'hidden'; }, 2200);
+    });
+  })();
 
   updateRing(false);
 
