@@ -2192,6 +2192,8 @@
      without a backend, so it's left as-is rather than faked. ---------- */
   document.querySelector('[title="Add guide"]')?.addEventListener('click', () => openTaskDrawer('New guide', 'No date set'));
   document.querySelector('[title="Add milestone"]')?.addEventListener('click', () => openTaskDrawer('New milestone', 'No date set'));
+  document.querySelector('[title="Add task"]')?.addEventListener('click', () => openTaskDrawer('New task', 'No date set'));
+  document.querySelector('[title="Open calendar"]')?.addEventListener('click', () => location.href = 'calendar.html');
 
   /* ---------- Journey: "suggested guides" table rows have no matching built
      guide content today (their titles don't match any community-detail.html
@@ -2323,6 +2325,19 @@
       emptyState.style.display = '';
       AtlasUI.revealNow(emptyState.querySelectorAll('.reveal'));
     }
+  }
+
+  /* ---------- Search / Help & support, reached from another page ----------
+     Every secondary page's sidebar Search/Help icons navigate here with
+     ?search=1 / ?help=1 rather than duplicating the full search index (see
+     SEARCH_INDEX above) or the FAQ content on every single page — same
+     pattern as ?newuser=1 above. */
+  const entryParams = new URLSearchParams(location.search);
+  if (entryParams.get('search')){
+    showDrawer(document.getElementById('searchDrawer'));
+    document.getElementById('globalSearch')?.focus();
+  } else if (entryParams.get('help')){
+    showDrawer(document.getElementById('helpDrawer'));
   }
 })();
 </script>
