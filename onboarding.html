@@ -275,13 +275,17 @@
   }
 
   function validateCurrent(){
-    if (current === 0 && !answers.course){ shake(); return false; }
-    if (current === 2 && !answers.budget){ shake(); return false; }
-    if (current === 3 && !answers.level){ shake(); return false; }
+    if (current === 0 && !answers.course){ shake('.ob-chip-grid'); return false; }
+    if (current === 2 && !answers.budget){ shake('.ob-chip-grid'); return false; }
+    if (current === 3){
+      if (!answers.level){ shake('.ob-chip-grid'); return false; }
+      const percentField = document.getElementById('obPercent');
+      if (!percentField.value.trim()){ shake('#obPercent'); percentField.focus(); return false; }
+    }
     return true;
   }
-  function shake(){
-    const active = document.querySelector('.ob-q.active .ob-chip-grid');
+  function shake(selector){
+    const active = document.querySelector(`.ob-q.active ${selector}`);
     if (!active || AtlasUI.skipGSAP || AtlasUI.REDUCE) return;
     gsap.fromTo(active, { x: -6 }, { x: 0, duration: .4, ease: 'elastic.out(1, .4)' });
   }

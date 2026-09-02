@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<!-- No auth-gate: a prospective student should be able to read this before
+     ever signing in. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<style>
+  .legal-wrap{ max-width:680px; margin:0 auto; padding:40px 20px 60px; }
+  .legal-wrap h1{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:28px; letter-spacing:-.02em; margin-bottom:6px; }
+  .legal-wrap .updated{ font-size:12.5px; color:var(--ink-soft); margin-bottom:24px; }
+  .legal-wrap h2{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:16px; margin:26px 0 10px; }
+  .legal-wrap p, .legal-wrap li{ font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
+  .legal-wrap ul{ padding-left:20px; margin-top:6px; }
+  .legal-wrap li + li{ margin-top:6px; }
+  .legal-back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none; margin-bottom:20px; }
+  .legal-back:hover{ color:var(--ink); }
+  .legal-back svg{ width:15px; height:15px; }
+</style>
+</head>
+<body>
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+  <div class="legal-wrap reveal">
+    <a class="legal-back" href="javascript:history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</a>
+    <h1>Terms of Service</h1>
+    <div class="updated">Placeholder — pending legal review</div>
+
+    <div class="banner-error" style="background:var(--blue-soft); border-left-color:var(--blue);">
+      <span>This page is a stand-in so the link on the sign-in screen goes somewhere real, not a dead-end fragment. It states only what's already true and built elsewhere in Atlas — it is not final Terms of Service copy, and shouldn't be treated as one. Real Terms need an actual legal review before this product takes on real users.</span>
+    </div>
+
+    <h2>What's actually true today</h2>
+    <ul>
+      <li>Atlas is free for students. There is no subscription, no paywall, and no hidden fee anywhere in the product.</li>
+      <li>Service partners (banks, insurers, forex providers, lenders, housing) pay Atlas a flat, published fee — never a commission tied to what you choose. That's disclosed on every partner card, not just here.</li>
+      <li>Documents in Atlas are checklist ticks only. There is no file upload anywhere in the free tier.</li>
+      <li>Atlas doesn't rank or hide options based on who pays more — every partner list is ordered on Atlas's own terms.</li>
+    </ul>
+
+    <h2>What isn't decided yet</h2>
+    <p>Account termination conditions, dispute resolution, liability limits, governing jurisdiction, and everything else a real Terms of Service needs to cover — none of that is drafted. Treat this page as absent, not as agreed-to, until it's replaced with real legal copy.</p>
+  </div>
+<script src="shared/atlas-shared.js"></script>
+<script>
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot());
+  } else {
+    AtlasUI.boot();
+  }
+</script>
+</body>
+</html>

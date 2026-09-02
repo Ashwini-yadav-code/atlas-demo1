@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<!-- No auth-gate: a prospective student should be able to read this before
+     ever signing in. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/atlas-design-system.css">
+<link rel="stylesheet" href="shared/atlas-extended.css">
+<style>
+  .legal-wrap{ max-width:680px; margin:0 auto; padding:40px 20px 60px; }
+  .legal-wrap h1{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:28px; letter-spacing:-.02em; margin-bottom:6px; }
+  .legal-wrap .updated{ font-size:12.5px; color:var(--ink-soft); margin-bottom:24px; }
+  .legal-wrap h2{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:16px; margin:26px 0 10px; }
+  .legal-wrap p, .legal-wrap li{ font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
+  .legal-wrap ul{ padding-left:20px; margin-top:6px; }
+  .legal-wrap li + li{ margin-top:6px; }
+  .legal-back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none; margin-bottom:20px; }
+  .legal-back:hover{ color:var(--ink); }
+  .legal-back svg{ width:15px; height:15px; }
+</style>
+</head>
+<body>
+  <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+  <div class="legal-wrap reveal">
+    <a class="legal-back" href="javascript:history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</a>
+    <h1>Privacy Policy</h1>
+    <div class="updated">Placeholder — pending legal review</div>
+
+    <div class="banner-error" style="background:var(--blue-soft); border-left-color:var(--blue);">
+      <span>This page is a stand-in so the link on the sign-in screen goes somewhere real, not a dead-end fragment. It states only what's already true and built elsewhere in Atlas — it is not a final Privacy Policy, and shouldn't be treated as one. A real policy needs actual legal review (including DPDPA and UK GDPR obligations, since Atlas handles Indian students' data) before this product takes on real users.</span>
+    </div>
+
+    <h2>What Atlas actually stores today</h2>
+    <p>This build has no live backend collecting personal data yet. What exists is demonstrated with the same account throughout ("Harman Sidhu") — nothing you'd enter into a real signup is sent anywhere. The only things this browser stores locally (never transmitted) are:</p>
+    <ul>
+      <li>Whether you're signed in on this browser, and whether you've finished onboarding.</li>
+      <li>Your light/dark theme choice.</li>
+      <li>A university you've added to or removed from your shortlist.</li>
+    </ul>
+    <p>All of it lives in this browser's own storage and clears if you clear your browser data. Nothing here is a server, a database, or a third party.</p>
+
+    <h2>What isn't decided yet</h2>
+    <p>What real personal data Atlas will collect once it has a real backend, how long it's retained, who it's shared with (including service partners), and how a student can access, correct or delete it — none of that is drafted. Treat this page as absent, not as agreed-to, until it's replaced with a real, reviewed policy.</p>
+  </div>
+<script src="shared/atlas-shared.js"></script>
+<script>
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => AtlasUI.boot());
+  } else {
+    AtlasUI.boot();
+  }
+</script>
+</body>
+</html>

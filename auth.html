@@ -189,6 +189,7 @@
               <div class="al-field" id="nameField" hidden>
                 <label class="al-label" for="fullName">Full name</label>
                 <input class="al-input" id="fullName" type="text" placeholder="Your name" autocomplete="name">
+                <p class="al-help" id="nameHelp"></p>
               </div>
 
               <div class="al-field">
@@ -207,7 +208,7 @@
               <span id="googleLabel">Continue with Google</span>
             </button>
 
-            <p class="al-fine">By continuing you agree to Atlas&rsquo;s <a class="al-link" href="#terms">Terms</a> and <a class="al-link" href="#privacy">Privacy Policy</a>.</p>
+            <p class="al-fine">By continuing you agree to Atlas&rsquo;s <a class="al-link" href="terms.html" target="_blank" rel="noopener">Terms</a> and <a class="al-link" href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</p>
           </section>
 
           <section class="al-step" id="stepCode">
@@ -250,6 +251,8 @@
 (function(){
   const tabs = document.getElementById('authTabs');
   const nameField = document.getElementById('nameField');
+  const fullNameInput = document.getElementById('fullName');
+  const nameHelp = document.getElementById('nameHelp');
   const heading = document.getElementById('formHeading');
   const sub = document.getElementById('formSub');
   const stepForm = document.getElementById('stepForm');
@@ -282,8 +285,13 @@
       ? 'Three minutes to your first ranked shortlist.'
       : 'Log in to pick up your applications where you left off.';
     returningBanner.classList.toggle('al-on', mode === 'login' && !returningDismissed && stepForm.classList.contains('al-active'));
+    nameHelp.classList.remove('al-error');
+    nameHelp.textContent = '';
   }
   setMode(mode);
+  fullNameInput.addEventListener('input', () => {
+    if (fullNameInput.value.trim()){ nameHelp.classList.remove('al-error'); nameHelp.textContent = ''; }
+  });
 
   tabs.addEventListener('click', (e) => {
     const btn = e.target.closest('.al-tab');
@@ -319,6 +327,15 @@
   document.getElementById('identityForm').addEventListener('submit', (e) => {
     e.preventDefault();
     isHarmanShortcut = false;
+
+    if (mode === 'signup' && !fullNameInput.value.trim()){
+      nameHelp.textContent = 'Enter your name.';
+      nameHelp.classList.add('al-error');
+      fullNameInput.focus();
+      return;
+    }
+    if (nameHelp) { nameHelp.classList.remove('al-error'); nameHelp.textContent = ''; }
+
     const value = emailInput.value.trim();
     if (!value || !value.includes('@')){
       emailHelp.textContent = 'Enter a valid email address.';

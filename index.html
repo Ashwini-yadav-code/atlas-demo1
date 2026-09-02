@@ -1315,7 +1315,10 @@
           <div class="card reveal" style="margin-top:22px;">
             <div class="panel-head">
               <h3>Your shortlist</h3>
-              <span class="svc-link" style="cursor:pointer;">View full journey<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              <div style="display:flex; align-items:center; gap:18px;">
+                <span class="svc-link" style="cursor:pointer;" onclick="location.href='catalogue.html'">Browse all universities<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <span class="svc-link" id="viewFullJourneyLink" style="cursor:pointer;">View full journey<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </div>
             </div>
             <p style="font-size:12px; color:var(--ink-soft); padding:0 20px 14px; margin-top:-8px;">Comparable paid packages elsewhere run ₹25,000–₹34,000 (Leap Scholar Premium, Yocket Premium) — this shortlist, and everything after it, is free on Atlas.</p>
             <div class="shortlist-grid">
@@ -2122,7 +2125,7 @@
   });
 
   /* ---------- Home: "View full journey" -> switch to the Journey tab ---------- */
-  document.querySelector('#view-home .panel-head .svc-link')?.addEventListener('click', () => {
+  document.getElementById('viewFullJourneyLink')?.addEventListener('click', () => {
     document.querySelector('#pillnav [data-view="journey"]')?.click();
   });
 
