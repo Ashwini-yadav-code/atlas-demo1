@@ -35,7 +35,7 @@ html, body{ background:#0c0b0a; }
 @media (prefers-reduced-motion:reduce){ .home-media video{ display:none; } }
 
 /* ---------- glass surfaces: light ink + translucency across the shell ---------- */
-.app{
+body{
   --ink:#ffffff;
   --ink-soft:rgba(255,255,255,.8);
   --ink-faint:rgba(255,255,255,.62);
@@ -49,19 +49,20 @@ html, body{ background:#0c0b0a; }
 }
 
 .glass-surface,
-.app .card,
-.app .pillnav,
-.app .icon-btn,
-.app .searchbar,
-.app .url-bar,
-.app .chip,
-.app .svc-card,
-.app .comm-card,
-.app .cat-card,
-.app .stack .task,
-.app .guide-card,
-.app .msg-list,
-.app .msg-thread{
+.card,
+.pillnav,
+.icon-btn,
+.searchbar,
+.url-bar,
+.chip,
+.ob-chip,
+.svc-card,
+.comm-card,
+.cat-card,
+.stack .task,
+.guide-card,
+.msg-list,
+.msg-thread{
   background:linear-gradient(155deg,rgba(255,255,255,.17),rgba(255,255,255,.06));
   backdrop-filter:blur(30px) saturate(150%);
   -webkit-backdrop-filter:blur(30px) saturate(150%);
@@ -69,33 +70,38 @@ html, body{ background:#0c0b0a; }
   box-shadow:0 40px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.26);
   color:#ffffff;
 }
-.app .icon-btn, .app .pillnav, .app .chip, .app .searchbar, .app .url-bar{
+.icon-btn, .pillnav, .chip, .searchbar, .url-bar{
   box-shadow:0 12px 26px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.24);
 }
-.app .sidebar{
+.sidebar{
   background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
   backdrop-filter:blur(30px) saturate(150%);
   -webkit-backdrop-filter:blur(30px) saturate(150%);
   border-color:rgba(255,255,255,.18);
 }
-.app .side-btn{ color:rgba(255,255,255,.78); }
-.app .side-btn:hover{ background:rgba(255,255,255,.14); color:#fff; }
-.app .side-btn.active{ background:#ffffff; color:#14151a; }
-.app .pillnav button{ color:rgba(255,255,255,.78); }
-.app .pillnav button.active{ background:#ffffff; color:#14151a; }
-.app .chip.active, .app .chip[aria-pressed="true"]{ background:#ffffff; color:#14151a; border-color:#ffffff; }
-.app input, .app .searchbar input, .app .url-bar input, .app .field-input, .app textarea{ color:#fff; background:transparent; }
-.app input::placeholder, .app textarea::placeholder{ color:rgba(255,255,255,.62); }
-.app .field-input{ border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.08) !important; }
-.app .field-input:focus{ border-color:rgba(255,255,255,.55); }
+.side-btn{ color:rgba(255,255,255,.78); }
+.side-btn:hover{ background:rgba(255,255,255,.14); color:#fff; }
+.side-btn.active, .side-btn[aria-pressed="true"]{ background:#ffffff; color:#14151a; }
+.pillnav button{ color:rgba(255,255,255,.78); }
+.pillnav button.active{ background:#ffffff; color:#14151a; }
+.chip.active, .chip[aria-pressed="true"], .ob-chip.active{ background:#ffffff; color:#14151a; border-color:#ffffff; }
+/* .btn-primary colors its label with var(--panel) for contrast against its
+   solid --accent background; --panel is now translucent (~10% white),
+   which made every primary button's label invisible site-wide — same
+   pattern as .card.accent-dark above, same fix */
+.btn-primary{ color:#14151a; }
+input, .searchbar input, .url-bar input, .field-input, textarea{ color:#fff; background:transparent; }
+input::placeholder, textarea::placeholder{ color:rgba(255,255,255,.62); }
+.field-input{ border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.08) !important; }
+.field-input:focus{ border-color:rgba(255,255,255,.55); }
 
 /* nested surfaces stay quieter than their card */
-.app .list-card{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); box-shadow:none; }
-.app .row:hover{ background:rgba(255,255,255,.12); }
-.app .mini-btn{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.24); color:#fff; }
-.app .mini-btn:hover{ background:rgba(255,255,255,.22); }
-.app .plus{ border-color:rgba(255,255,255,.34); color:#fff; }
-.app .shortlist-card, .app .next-grid .card, .app .partner-row, .app .cal-cell, .app .aftercare-card{
+.list-card{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); box-shadow:none; }
+.row:hover{ background:rgba(255,255,255,.12); }
+.mini-btn{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.24); color:#fff; }
+.mini-btn:hover{ background:rgba(255,255,255,.22); }
+.plus{ border-color:rgba(255,255,255,.34); color:#fff; }
+.shortlist-card, .next-grid .card, .partner-row, .cal-cell, .aftercare-card{
   background:linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
   backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
@@ -103,62 +109,71 @@ html, body{ background:#0c0b0a; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
   color:#fff;
 }
-.app th{ color:rgba(255,255,255,.68); border-bottom-color:rgba(255,255,255,.16); }
-.app td{ border-bottom-color:rgba(255,255,255,.12); }
-.app .step-dot{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.7); }
-.app .step.done .step-dot{ background:#ffffff; border-color:#ffffff; color:#14151a; }
-.app .step.now .step-dot{ background:rgba(12,10,9,.6); border-color:#8f9dff; color:#c3caff; }
-.app .step-line{ background:rgba(255,255,255,.24); }
-.app .step.done .step-line, .app .step.now .step-line{ background:#ffffff; }
+th{ color:rgba(255,255,255,.68); border-bottom-color:rgba(255,255,255,.16); }
+td{ border-bottom-color:rgba(255,255,255,.12); }
+.step-dot{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.7); }
+.step.done .step-dot{ background:#ffffff; border-color:#ffffff; color:#14151a; }
+.step.now .step-dot{ background:rgba(12,10,9,.6); border-color:#8f9dff; color:#c3caff; }
+.step-line{ background:rgba(255,255,255,.24); }
+.step.done .step-line, .step.now .step-line{ background:#ffffff; }
 
 /* pills and accents re-tuned for a dark, translucent surface */
-.app .due{ color:rgba(255,255,255,.8); }
-.app .due.soon{ color:#ffd9bd; background:rgba(241,96,1,.26); }
-.app .status-pill.live{ background:rgba(46,160,97,.26); color:#a8f0c6; }
-.app .status-pill.draft{ background:rgba(241,96,1,.24); color:#ffd9bd; }
-.app .match-high{ background:rgba(46,160,97,.26); color:#a8f0c6; }
-.app .match-mid{ background:rgba(241,96,1,.26); color:#ffd9bd; }
-.app .svc-why, .app .svc-link{ color:#ffbe8f; }
-.app .svc-card.priority{ border-color:rgba(241,96,1,.45); background:linear-gradient(155deg,rgba(241,96,1,.2),rgba(255,255,255,.05)); }
-.app .trust-ribbon{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(255,255,255,.86); }
-.app .trust-tag, .app .svc-earn{ color:#a8f0c6; }
-.app .svc-earn{ border-top-color:rgba(255,255,255,.16); }
-.app .j-head h1, .app .j-head p{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
-.app .panel-note, .app .sec-head span, .app .stat-lbl{ color:rgba(255,255,255,.74); }
-.app .fin-table .fin-best{ background:rgba(46,160,97,.18); }
-.app .fin-table th, .app .fin-table td{ border-color:rgba(255,255,255,.14); }
-.app .aftercare-tabs button{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); color:rgba(255,255,255,.8); }
-.app .aftercare-tabs button.active{ background:#ffffff; color:#14151a; border-color:#ffffff; }
-.app .aftercare-contact{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); }
+.due{ color:rgba(255,255,255,.8); }
+.due.soon{ color:#ffd9bd; background:rgba(241,96,1,.26); }
+.status-pill.live{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+.status-pill.draft{ background:rgba(241,96,1,.24); color:#ffd9bd; }
+.match-high{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+.match-mid{ background:rgba(241,96,1,.26); color:#ffd9bd; }
+.svc-why, .svc-link{ color:#ffbe8f; }
+.svc-card.priority{ border-color:rgba(241,96,1,.45); background:linear-gradient(155deg,rgba(241,96,1,.2),rgba(255,255,255,.05)); }
+.trust-ribbon{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(255,255,255,.86); }
+.trust-tag, .svc-earn{ color:#a8f0c6; }
+.svc-earn{ border-top-color:rgba(255,255,255,.16); }
+.j-head h1, .j-head p{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
+.panel-note, .sec-head span, .stat-lbl{ color:rgba(255,255,255,.74); }
+.fin-table .fin-best{ background:rgba(46,160,97,.18); }
+.fin-table th, .fin-table td{ border-color:rgba(255,255,255,.14); }
+.aftercare-tabs button{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); color:rgba(255,255,255,.8); }
+.aftercare-tabs button.active{ background:#ffffff; color:#14151a; border-color:#ffffff; }
+.aftercare-contact{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); }
 
 /* the branded accent-dark / ember cards keep their gradient, just with
    darker glass around them instead of a flat fill */
-.app .card.accent-dark{
+.card.accent-dark{
   background:linear-gradient(155deg,rgba(12,10,9,.64),rgba(12,10,9,.42));
   backdrop-filter:blur(26px) saturate(140%);
   -webkit-backdrop-filter:blur(26px) saturate(140%);
   border-color:rgba(255,255,255,.16);
+  /* the base design system colors accent-dark card text with var(--panel)
+     for contrast against its old solid --bezel background; --panel is now
+     a ~10%-opacity white (a fine glass *fill*, unreadable as *text*), so
+     accent-dark text needs its own solid color again here */
+  color:#ffffff;
 }
-.app .card.accent-dark th{ color:rgba(255,255,255,.66); border-bottom-color:rgba(255,255,255,.16); }
-.app .card.accent-dark td{ border-bottom-color:rgba(255,255,255,.12); }
-.app .focus-card{
+.card.accent-dark h3, .card.accent-dark h4, .card.accent-dark h5,
+.card.accent-dark .panel-head h3{ color:#ffffff; }
+.card.accent-dark th{ color:rgba(255,255,255,.66); border-bottom-color:rgba(255,255,255,.16); }
+.card.accent-dark td{ border-bottom-color:rgba(255,255,255,.12); }
+/* same var(--panel)-as-text-color issue: brand mark + loader icons */
+.brand-mark svg, #loader .loader-mark svg{ color:#ffffff; }
+.focus-card{
   background:linear-gradient(120deg,#000000 0%, #c10801 44%, #f16001 84%, #d9c3ab 100%);
   border-color:#c10801; color:#ffffff;
 }
-.app .focus-cta{ background:#ffffff; color:#c10801; }
-.app .focus-cta:hover{ box-shadow:0 8px 18px -8px rgba(0,0,0,.55); }
+.focus-cta{ background:#ffffff; color:#c10801; }
+.focus-cta:hover{ box-shadow:0 8px 18px -8px rgba(0,0,0,.55); }
 
 /* drawers/modals sit above the video too */
-.app .drawer{
+.drawer{
   background:linear-gradient(155deg,rgba(20,18,16,.86),rgba(12,10,9,.92));
   backdrop-filter:blur(30px) saturate(150%);
   -webkit-backdrop-filter:blur(30px) saturate(150%);
   border-left:1px solid rgba(255,255,255,.14);
 }
-.app .drawer-head{ border-bottom-color:rgba(255,255,255,.14); }
+.drawer-head{ border-bottom-color:rgba(255,255,255,.14); }
 
 @media (max-width:860px){
-  .app .bottom-nav, .app nav.sidebar{
+  .bottom-nav, nav.sidebar{
     background:linear-gradient(180deg,rgba(12,10,9,.72),rgba(12,10,9,.86));
     backdrop-filter:blur(26px) saturate(140%);
     -webkit-backdrop-filter:blur(26px) saturate(140%);
