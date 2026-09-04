@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<script src="shared/atlas-auth-gate.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas - Ember &amp; Graphite (v2)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<!-- additive only: the new drawer/notification-row classes used to wire up
-     the bell + task drawers below. Defines no token or class that already
-     exists in this file's own <style> blocks, so it changes nothing else. -->
-<link rel="stylesheet" href="shared/atlas-extended.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <template id="__bundler_thumbnail" data-bg-color="#ececec">
@@ -193,9 +188,6 @@
   }
   .pillnav button.active{background:var(--accent); color:var(--panel);}
   .pillnav button:not(.active):hover{color:var(--ink);}
-  /* icons ship in the markup for the mobile bottom-tab-bar pattern below,
-     hidden here so desktop's pill-nav renders exactly as before */
-  .pillnav .nav-icon{ display:none; }
 
   .top-right{
     margin-left:auto;
@@ -841,85 +833,129 @@
 </style>
 
 <style>
-  /* ===========================================================
-     Mobile navigation pattern — ux-spec.md §4. Added as its own
-     final layer rather than edited into the blocks above, so the
-     original mobile rules stay intact for history/diff and this
-     simply wins the cascade (same specificity, declared later).
-     Nothing here fires above 620px — desktop is unchanged.
-     =========================================================== */
-
-  /* account menu (mobile collapse target for the tools rail) —
-     base rules live outside the media query since the menu itself
-     stays display:none until JS opens it, at any width */
-  .top-right{ position:relative; }
-  .account-menu{
-    display:none; position:absolute; top:calc(100% + 10px); right:0;
-    min-width:220px; background:var(--card); border:1px solid var(--line);
-    border-radius:var(--r-lg); box-shadow:var(--shadow-card-hover);
-    padding:8px; z-index:15;
+  /* ============ VIDEO BACKDROP + GLASS SKIN (all views) ============ */
+  html, body{ background:#0c0b0a; }
+  .screen, .app, .main, .view{ background:transparent; }
+  .home-media{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+  .home-media video{
+    position:absolute; top:50%; left:50%; min-width:100%; min-height:100%;
+    width:auto; height:auto; transform:translate(-50%,-50%) scale(1.04); object-fit:cover;
   }
-  .account-menu.on{ display:block; }
-  .account-menu-item{
-    display:flex; align-items:center; gap:12px; padding:11px 12px;
-    border-radius:12px; font-size:13.5px; font-weight:600; color:var(--ink);
-    cursor:pointer; min-height:44px;
+  .home-media .hm-scrim{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(115deg,rgba(8,7,6,.84) 0%,rgba(10,8,7,.66) 42%,rgba(8,7,6,.58) 100%),
+      radial-gradient(120% 90% at 70% 6%,rgba(8,7,6,0) 26%,rgba(8,7,6,.6) 100%);
   }
-  .account-menu-item:hover{ background:var(--panel); }
-  .account-menu-item svg{ width:17px; height:17px; color:var(--ink-soft); flex:none; }
-  .account-menu-sep{ height:1px; background:var(--line); margin:6px 4px; }
-  .account-menu-item.logout{ color:var(--coral); }
-  .account-menu-item.logout svg{ color:var(--coral); }
-  .account-menu-item.logout:hover{ background:color-mix(in srgb, var(--coral) 12%, transparent); }
+  .home-media .hm-grain{
+    position:absolute; inset:0; opacity:.14; mix-blend-mode:overlay;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22/></filter><rect width=%22160%22 height=%22160%22 filter=%22url(%23n)%22/></svg>');
+  }
+  .spotlight{ display:none; }
 
-  /* Journey board sub-tabs (mobile only — see .j-subtabs display below) */
-  .j-subtabs{ display:none; gap:8px; overflow-x:auto; margin-bottom:14px; }
+  /* light ink + translucent surfaces across the whole shell */
+  .app{
+    --ink:#ffffff;
+    --ink-soft:rgba(255,255,255,.8);
+    --ink-faint:rgba(255,255,255,.62);
+    --line:rgba(255,255,255,.18);
+    --line-strong:rgba(255,255,255,.3);
+    --tint:rgba(255,255,255,.07);
+    --tint-line:rgba(255,255,255,.16);
+    --panel:rgba(255,255,255,.1);
+    --card:rgba(255,255,255,.12);
+    color:#ffffff;
+  }
 
-  @media (max-width:620px){
-    /* sidebar tools stop being persistent chrome */
-    .sidebar{ display:none; }
-    .app{ flex-direction:column; }
-    .main{ padding-bottom:78px; } /* clears the fixed bottom tab bar */
+  .glass-surface,
+  .app .card,
+  .app .pillnav,
+  .app .icon-btn,
+  .app .searchbar,
+  .app .chip,
+  .app .svc-card,
+  .app .comm-card,
+  .app .stack .task,
+  .app .guide-card{
+    background:linear-gradient(155deg,rgba(255,255,255,.17),rgba(255,255,255,.06));
+    backdrop-filter:blur(30px) saturate(150%);
+    -webkit-backdrop-filter:blur(30px) saturate(150%);
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.26);
+    color:#ffffff;
+  }
+  .app .icon-btn, .app .pillnav, .app .chip, .app .searchbar{
+    box-shadow:0 12px 26px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.24);
+  }
+  .app .sidebar{
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+    backdrop-filter:blur(30px) saturate(150%);
+    -webkit-backdrop-filter:blur(30px) saturate(150%);
+    border-color:rgba(255,255,255,.18);
+  }
+  .app .side-btn{ color:rgba(255,255,255,.78); }
+  .app .side-btn:hover{ background:rgba(255,255,255,.14); color:#fff; }
+  .app .pillnav button{ color:rgba(255,255,255,.78); }
+  .app .pillnav button.active{ background:#ffffff; color:#14151a; }
+  .app .chip.active, .app .chip[aria-pressed="true"]{ background:#ffffff; color:#14151a; border-color:#ffffff; }
+  .app input, .app .searchbar input{ color:#fff; background:transparent; }
+  .app input::placeholder{ color:rgba(255,255,255,.62); }
 
-    /* topbar: brand + bell + avatar only. Also: .topbar and .view are
-       siblings that both carry z-index:2 in the base stylesheet — at
-       equal z-index the later-DOM .view paints over .topbar, which traps
-       the now-fixed pillnav underneath page content despite its own
-       z-index:9 (a fixed element's stacking is resolved within its
-       nearest stacking-context ancestor, not the root). Bumping .topbar
-       above .view here — mobile-only — is what actually fixes that. */
-    .topbar{ flex-wrap:nowrap; padding:14px 16px; gap:10px; z-index:11; }
-    .icon-btn{ width:44px; height:44px; }
-    .profile-btn{ padding:5px; margin:-5px; } /* pad the tap target to ~44px without growing the avatar */
+  /* nested surfaces stay quieter than their card */
+  .app .list-card{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); box-shadow:none; }
+  .app .row:hover{ background:rgba(255,255,255,.12); }
+  .app .mini-btn{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.24); color:#fff; }
+  .app .mini-btn:hover{ background:rgba(255,255,255,.22); }
+  .app .plus{ border-color:rgba(255,255,255,.34); color:#fff; }
+  .app .shortlist-card, .app .next-grid .card{
+    background:linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    border-color:rgba(255,255,255,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+    color:#fff;
+  }
+  .app th{ color:rgba(255,255,255,.68); border-bottom-color:rgba(255,255,255,.16); }
+  .app td{ border-bottom-color:rgba(255,255,255,.12); }
+  .app .step-dot{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.7); }
+  .app .step.done .step-dot{ background:#ffffff; border-color:#ffffff; color:#14151a; }
+  .app .step.now .step-dot{ background:rgba(12,10,9,.6); border-color:#8f9dff; color:#c3caff; }
+  .app .step-line{ background:rgba(255,255,255,.24); }
+  .app .step.done .step-line, .app .step.now .step-line{ background:#ffffff; }
 
-    /* pill-nav leaves the topbar and becomes the fixed bottom tab bar */
-    .pillnav{
-      position:fixed; left:0; right:0; bottom:0; z-index:9;
-      width:auto; background:var(--card); border:none; border-top:1px solid var(--line);
-      border-radius:0; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
-      display:flex; justify-content:space-around;
+  /* pills and accents re-tuned for a dark surface */
+  .app .due{ color:rgba(255,255,255,.8); }
+  .app .due.soon{ color:#ffd9bd; background:rgba(241,96,1,.26); }
+  .app .status-pill.live{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+  .app .status-pill.draft{ background:rgba(241,96,1,.24); color:#ffd9bd; }
+  .app .match-high{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+  .app .match-mid{ background:rgba(241,96,1,.26); color:#ffd9bd; }
+  .app .svc-why, .app .svc-link{ color:#ffbe8f; }
+  .app .svc-card.priority{ border-color:rgba(241,96,1,.45); background:linear-gradient(155deg,rgba(241,96,1,.2),rgba(255,255,255,.05)); }
+  .app .trust-ribbon{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(255,255,255,.86); }
+  .app .j-head h1, .app .j-head p{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
+  .app .panel-note, .app .sec-head span, .app .stat-lbl{ color:rgba(255,255,255,.74); }
+
+  /* the branded cards keep their ember gradient, just darker glass around them */
+  .app .card.accent-dark{
+    background:linear-gradient(155deg,rgba(12,10,9,.64),rgba(12,10,9,.42));
+    backdrop-filter:blur(26px) saturate(140%);
+    -webkit-backdrop-filter:blur(26px) saturate(140%);
+    border-color:rgba(255,255,255,.16);
+  }
+  .app .card.accent-dark th{ color:rgba(255,255,255,.66); border-bottom-color:rgba(255,255,255,.16); }
+  .app .card.accent-dark td{ border-bottom-color:rgba(255,255,255,.12); }
+
+  @media (max-width:860px){
+    .app .bottom-nav, .app nav.sidebar{
+      background:linear-gradient(180deg,rgba(12,10,9,.72),rgba(12,10,9,.86));
+      backdrop-filter:blur(26px) saturate(140%);
+      -webkit-backdrop-filter:blur(26px) saturate(140%);
+      border-color:rgba(255,255,255,.18);
     }
-    .pillnav button{
-      flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
-      background:transparent; color:var(--ink-soft); padding:6px 2px; border-radius:12px;
-      font-size:10.5px; min-height:44px;
-    }
-    .pillnav button.active{ background:transparent; color:var(--accent); }
-    .pillnav .nav-icon{ display:block; width:20px; height:20px; }
-
-    /* touch targets */
-    .mini-btn{ width:36px; height:36px; }
-    .chip{ min-height:44px; display:inline-flex; align-items:center; }
-
-    /* Journey: one board column at a time, swipeable, instead of a
-       4-column vertical scroll */
-    .j-subtabs{ display:flex; }
-    .j-board{ grid-template-columns:1fr; }
-    .j-board > .j-col{ display:none; }
-    .j-board > .j-col.active-col{ display:flex; }
   }
+  @media (prefers-reduced-motion:reduce){ .home-media video{ display:none; } }
 </style>
-<link rel="stylesheet" href="shared/atlas-glass-video.css">
 </head>
 <body>
 
@@ -945,7 +981,7 @@
       <nav class="sidebar" id="sidebarRail" aria-label="Tools">
         <div class="side-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
         <div class="side-btn" title="Messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="side-dot"></span></div>
-        <div class="side-btn" title="Document checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <div class="side-btn" title="Document vault"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
         <div class="side-btn" title="Help &amp; support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg></div>
         <div class="side-gap"></div>
         <div class="side-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
@@ -964,10 +1000,10 @@
           </div>
 
           <nav class="pillnav" id="pillnav" aria-label="Sections">
-            <button data-view="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Home</span></button>
-            <button data-view="journey"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.4-7-11a7 7 0 0 1 14 0c0 4.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Journey</span></button>
-            <button data-view="services"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Services</span></button>
-            <button data-view="community"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17.5" cy="9" r="2.3"/><path d="M15.3 14.4c2.6.5 4.7 2.5 4.7 5.6"/></svg><span>Community</span></button>
+            <button data-view="home">Home</button>
+            <button data-view="journey" class="active">Journey</button>
+            <button data-view="services">Services</button>
+            <button data-view="community">Community</button>
           </nav>
 
           <div class="top-right">
@@ -976,25 +1012,11 @@
               <div class="avatar-ring"><img src="https://i.pravatar.cc/100?img=47" alt="Harman"></div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="11" height="11"><path d="M6 9l6 6 6-6"/></svg>
             </div>
-
-            <!-- mobile only: the sidebar tools rail collapses into this menu
-                 off the avatar instead of staying persistent chrome (ux spec §4) -->
-            <div class="account-menu" id="accountMenu">
-              <div class="account-menu-item" data-action="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Search</div>
-              <div class="account-menu-item" data-href="messaging.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Messages</div>
-              <div class="account-menu-item" data-href="checklist.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>Document checklist</div>
-              <div class="account-menu-item" data-action="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.7"/><path d="M12 17.2v.1"/></svg>Help &amp; support</div>
-              <div class="account-menu-sep"></div>
-              <div class="account-menu-item" data-href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>Profile &amp; settings</div>
-              <div class="account-menu-item" data-action="theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Toggle theme</div>
-              <div class="account-menu-sep"></div>
-              <div class="account-menu-item logout" id="logoutMenuItem" data-action="logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log out</div>
-            </div>
           </div>
         </div>
 
         <!-- ===================== JOURNEY VIEW ===================== -->
-        <div class="view" id="view-journey">
+        <div class="view active" id="view-journey">
           <div class="j-head reveal">
             <div>
               <h1>Your Journey</h1>
@@ -1038,16 +1060,7 @@
             </div>
           </div>
 
-          <!-- mobile only: one board column at a time instead of a 4-column
-               scroll (ux spec §4) — swipeable, wired near the bottom of this file -->
-          <div class="j-subtabs" id="jSubtabs">
-            <button class="chip active" data-col="0">Shortlist</button>
-            <button class="chip" data-col="1">Applications</button>
-            <button class="chip" data-col="2">Visa &amp; docs</button>
-            <button class="chip" data-col="3">After visa</button>
-          </div>
-
-          <div class="j-board" id="jBoard">
+          <div class="j-board">
             <!-- col 1: shortlist -->
             <div class="j-col reveal">
               <div class="col-label">Shortlist <span class="col-count">2/2</span></div>
@@ -1125,11 +1138,11 @@
 
             <!-- col 3: visa & docs -->
             <div class="j-col reveal">
-              <div class="col-label">Visa &amp; docs <span class="col-count">0/4</span></div>
+              <div class="col-label">Visa &amp; docs <span class="col-count">1/4</span></div>
               <div class="list-card">
                 <div class="row">
                   <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
-                  <div class="row-label">CAS number requested<br><span class="trust-tag" style="color:var(--ink-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>You'll get a WhatsApp + push alert the moment this is issued</span></div>
+                  <div class="row-label">CAS number requested</div>
                   <div class="due soon">Due 2 Sept</div>
                 </div>
                 <div class="row">
@@ -1153,7 +1166,7 @@
 
             <!-- col 4: destination -->
             <div class="dest-wrap j-col reveal">
-              <div class="col-label">After the visa <span class="col-count">0/4</span></div>
+              <div class="col-label">After the visa <span class="col-count">4</span></div>
               <div class="next-grid">
                 <div class="card tilt">Housing<br>shortlist</div>
                 <div class="card tilt">Bank account<br>setup</div>
@@ -1236,35 +1249,11 @@
         </div>
 
         <!-- ===================== HOME VIEW ===================== -->
-        <div class="view active" id="view-home">
-          <!-- brand-new-user state (ux spec §5): "shouldn't show zeroed-out
-               stats — a .focus-card CTA instead." Hidden unless ?newuser=1
-               is in the URL, so the default page is unchanged either way. -->
-          <div id="homeEmptyState" style="display:none;">
-            <div class="j-head reveal">
-              <div>
-                <h1>Welcome, Harman</h1>
-                <p>Let's find your shortlist — it takes about three minutes.</p>
-              </div>
-            </div>
-            <div class="focus-card reveal">
-              <div class="focus-count">3<small>minutes</small></div>
-              <div class="focus-body">
-                <h2>Take the quiz to get your shortlist</h2>
-                <p>Answer a few questions about your course, budget and grades — we'll match you against a curated UK catalogue. No account needed to start.</p>
-              </div>
-              <button type="button" class="focus-cta" onclick="location.href='onboarding.html'">Take the 3-minute quiz</button>
-            </div>
-            <div class="empty-card reveal">
-              <b>No shortlist yet</b>
-              Your matched universities will show up here once you've finished the quiz.
-            </div>
-          </div>
-
+        <div class="view" id="view-home">
           <div class="j-head reveal">
             <div>
               <h1>Welcome back, Harman</h1>
-              <p>You're in the visa stage now. Pre-departure unlocks on visa approval.</p>
+              <p>You're in the visa stage now. Pre-departure unlocks once your CAS and biometrics are done.</p>
             </div>
           </div>
 
@@ -1292,15 +1281,15 @@
               </div>
 
               <div class="stat-row">
-                <div class="card reveal"><div class="stat-num" data-count="2">0</div><div class="stat-lbl">Applications</div></div>
-                <div class="card reveal"><div class="stat-num" data-count="2">0</div><div class="stat-lbl">Offers</div></div>
-                <div class="card reveal"><div class="stat-num" data-count="9" data-suffix="/13">0/13</div><div class="stat-lbl">Documents</div></div>
+                <div class="card glass reveal"><div class="stat-num" data-count="4">0</div><div class="stat-lbl">Applications</div></div>
+                <div class="card glass reveal"><div class="stat-num" data-count="2">0</div><div class="stat-lbl">Offers</div></div>
+                <div class="card glass reveal"><div class="stat-num" data-count="9" data-suffix="/13">0/13</div><div class="stat-lbl">Documents</div></div>
               </div>
 
             </div>
 
             <div class="home-side">
-              <div class="card reveal">
+              <div class="card glass reveal">
                 <div class="panel-head"><h3>Next up</h3><span class="panel-note">3 this week</span></div>
                 <div class="list-card tasklist">
                   <div class="row"><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div><div class="row-label">Accept your Manchester offer</div><div class="due soon">Due 2 Sept</div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div></div>
@@ -1309,43 +1298,36 @@
                 </div>
               </div>
 
-              <div class="card reveal">
+              <div class="card glass reveal">
                 <div class="panel-head"><h3>Your advisors</h3></div>
                 <div class="list-card">
                   <div class="row"><div class="p-avatar"><img src="https://i.pravatar.cc/100?img=32" alt="Priya S."></div><div class="row-label">Application advisor<br><span style="color:var(--ink-soft); font-weight:500;">Priya S.</span></div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div></div>
-                  <div class="row"><div class="p-avatar"><img src="https://i.pravatar.cc/100?img=12" alt="James O."></div><div class="row-label">Visa specialist<br><span style="color:var(--ink-soft); font-weight:500;">James O.</span><br><span class="trust-tag" style="margin-top:3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Typically responds within 2 business days</span></div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div></div>
+                  <div class="row"><div class="p-avatar"><img src="https://i.pravatar.cc/100?img=12" alt="James O."></div><div class="row-label">Visa specialist<br><span style="color:var(--ink-soft); font-weight:500;">James O.</span></div><div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="card reveal" style="margin-top:22px;">
+          <div class="card glass reveal" style="margin-top:22px;">
             <div class="panel-head">
               <h3>Your shortlist</h3>
-              <div style="display:flex; align-items:center; gap:18px;">
-                <span class="svc-link" style="cursor:pointer;" onclick="location.href='catalogue.html'">Browse all universities<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                <span class="svc-link" id="viewFullJourneyLink" style="cursor:pointer;">View full journey<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-              </div>
+              <span class="svc-link" style="cursor:pointer;">View full journey<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
             </div>
-            <p style="font-size:12px; color:var(--ink-soft); padding:0 20px 14px; margin-top:-8px;">Comparable paid packages elsewhere run ₹25,000–₹34,000 (Leap Scholar Premium, Yocket Premium) — this shortlist, and everything after it, is free on Atlas.</p>
             <div class="shortlist-grid">
-              <div class="shortlist-card tilt">
+              <div class="shortlist-card glass tilt">
                 <div class="match-pill match-high">96% match</div>
                 <h5>University of Manchester</h5>
                 <p>MSc Data Science · Offer accepted</p>
-                <span class="trust-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Matched to your profile — not a paid placement</span>
               </div>
-              <div class="shortlist-card tilt">
+              <div class="shortlist-card glass tilt">
                 <div class="match-pill match-high">91% match</div>
                 <h5>UCL</h5>
                 <p>MSc Data Science · Awaiting decision</p>
-                <span class="trust-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Matched to your profile — not a paid placement</span>
               </div>
-              <div class="shortlist-card tilt">
+              <div class="shortlist-card glass tilt">
                 <div class="match-pill match-mid">84% match</div>
                 <h5>University of Leeds</h5>
                 <p>MSc Data Science · Not yet applied</p>
-                <span class="trust-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Matched to your profile — not a paid placement</span>
               </div>
             </div>
           </div>
@@ -1382,42 +1364,36 @@
               <h4>UK bank account</h4>
               <p>Compare student accounts that don't need a UK address on day one.</p>
               <div class="svc-foot"><span class="svc-tag">4 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the bank — Atlas earns <b>£0</b></div>
             </div>
             <div class="card svc-card reveal tilt" data-cat="sim">
               <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
               <h4>SIM &amp; mobile plan</h4>
               <p>eSIMs you can activate before you land, plus long-term UK plans.</p>
               <div class="svc-foot"><span class="svc-tag">3 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the network — Atlas earns <b>£0</b></div>
             </div>
             <div class="card svc-card reveal tilt" data-cat="housing">
               <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg></div>
               <h4>Housing</h4>
               <p>Verified student accommodation near your campus, no agent fees.</p>
               <div class="svc-foot"><span class="svc-tag">6 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the landlord/agency — Atlas earns <b>£0</b></div>
             </div>
             <div class="card svc-card priority reveal tilt" data-cat="forex" data-priority="1">
               <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
               <h4>Foreign exchange</h4><span class="svc-why">Proves your financial evidence</span>
               <p>Send tuition and living costs at rates better than your bank's.</p>
               <div class="svc-foot"><span class="svc-tag">3 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the transfer partner — Atlas earns <b>£0</b></div>
             </div>
             <div class="card svc-card priority reveal tilt" data-cat="insurance" data-priority="1">
               <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
               <h4>Insurance</h4><span class="svc-why">Required by your visa conditions</span>
               <p>Health and travel cover that satisfies your visa requirements.</p>
               <div class="svc-foot"><span class="svc-tag">2 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the insurer — Atlas earns <b>£0</b></div>
             </div>
             <div class="card svc-card priority reveal tilt" data-cat="loans" data-priority="1">
               <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg></div>
               <h4>Student loans</h4><span class="svc-why">Accepted as proof of funds</span>
               <p>Collateral-free lenders that work with your university's cost of attendance.</p>
               <div class="svc-foot"><span class="svc-tag">5 partners</span><span class="svc-link">Explore<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-              <div class="svc-earn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Provided directly by the lender — Atlas earns <b>£0</b></div>
             </div>
           </div>
           <div class="empty" id="svcEmpty"><b>No services in this category yet</b>We are still vetting partners here. Try another filter.</div>
@@ -1435,68 +1411,27 @@
               <input type="search" id="commSearch" placeholder="Search jobs, events, guides" aria-label="Search jobs, events and guides">
             </label>
           </div>
-          <div class="card reveal aftercare-card">
-            <div class="panel-head" style="padding:0 0 4px;"><h3>Your after-care check-ins</h3></div>
-            <p style="font-size:13px; color:var(--ink-soft); line-height:1.6;">Landing is when most agents disappear — this is where Atlas doesn't. A real check-in at 30, 60 and 90 days, not just a link to this page.</p>
-            <div class="aftercare-tabs" id="aftercareTabs">
-              <button class="active" data-day="30">Day 30</button>
-              <button data-day="60">Day 60</button>
-              <button data-day="90">Day 90</button>
-            </div>
-            <div class="list-card" id="aftercareList" style="margin-top:12px;"></div>
-            <div class="aftercare-contact">
-              <div class="p-avatar"><img src="https://i.pravatar.cc/100?img=45" alt="Sana K."></div>
-              <div class="row-label">After-care contact<br><span style="color:var(--ink-soft); font-weight:500;">Sana K. — a different person from your application advisor, on purpose</span></div>
-              <div class="mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div>
-            </div>
-          </div>
-
-          <div class="card reveal" style="margin-bottom:20px;">
-            <div class="panel-head" style="padding:0 0 4px;"><h3>If your flight is delayed</h3></div>
-            <p style="font-size:13px; color:var(--ink-soft); line-height:1.7;">Tell your after-care contact as soon as you know — they'll flag it to your accommodation provider so your room isn't released. Being honest here: Atlas doesn't fund or guarantee airport pickup for any student, and neither does any agent in this market despite what some marketing implies. What we do provide is the arrival-week checklist below and a real person to ask, the moment you land.</p>
-          </div>
-
           <div class="comm-grid" id="commGrid">
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--blue);"></span>Jobs<span class="comm-view-all" data-type="job">View all</span></h3>
+              <h3><span class="dot" style="background:var(--blue);"></span>Jobs<span class="comm-view-all">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">Part-time · Manchester</div><h5>Library assistant, University of Manchester</h5><p>18 hrs/wk · within standard visa work limits</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">Part-time · Remote</div><h5>Content intern, student-run publication</h5><p>Flexible hours · portfolio-building role</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">Graduate route</div><h5>Junior analyst, fintech scale-up</h5><p>Sponsors Skilled Worker visa applicants</p></div>
             </div>
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--coral);"></span>Events<span class="comm-view-all" data-type="event">View all</span></h3>
+              <h3><span class="dot" style="background:var(--coral);"></span>Events<span class="comm-view-all">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">3 Sept · Online</div><h5>Pre-departure briefing: what to pack</h5><p>Hosted by students already in Manchester</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">10 Sept · Leeds</div><h5>New arrivals meetup</h5><p>Coffee, SIM cards, and a campus walk-through</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">14 Sept · Online</div><h5>Opening your bank account, live Q&amp;A</h5><p>With a partner bank's student team</p></div>
             </div>
             <div class="comm-col reveal">
-              <h3><span class="dot" style="background:var(--green);"></span>Guides<span class="comm-view-all" data-type="guide">View all</span></h3>
+              <h3><span class="dot" style="background:var(--green);"></span>Guides<span class="comm-view-all">View all</span></h3>
               <div class="card comm-card tilt"><div class="eyebrow">6 min read</div><h5>Registering with a GP in your first week</h5><p>What the NHS actually requires from you</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">4 min read</div><h5>Council tax exemption for students</h5><p>The one form that saves you real money</p></div>
               <div class="card comm-card tilt"><div class="eyebrow">5 min read</div><h5>Building UK credit history from zero</h5><p>Why it matters before you graduate</p></div>
             </div>
           </div>
           <div class="empty" id="commEmpty"><b>Nothing matches that search</b>Try a shorter phrase, or clear the field to see everything.</div>
-
-          <div class="card reveal" style="margin-top:20px;">
-            <div class="panel-head"><h3>Scholarships you may qualify for</h3></div>
-            <div class="list-card" style="margin:0 20px 20px;">
-              <div class="row"><div class="p-avatar" style="background:var(--green-soft); display:flex; align-items:center; justify-content:center; color:var(--green); font-weight:800; font-size:12px;">GB</div><div class="row-label">GREAT Scholarships (India)<br><span style="color:var(--ink-soft); font-weight:500;">£10,000 · Data Science &amp; STEM, Manchester-eligible</span></div><div class="due soon">Due 30 Sept</div></div>
-              <div class="row"><div class="p-avatar" style="background:var(--blue-soft); display:flex; align-items:center; justify-content:center; color:var(--blue); font-weight:800; font-size:12px;">CS</div><div class="row-label">Chevening-adjacent dept. awards<br><span style="color:var(--ink-soft); font-weight:500;">£2,000–£5,000 · merit-based, most Russell Group unis</span></div><div class="due">Rolling</div></div>
-              <div class="row"><div class="p-avatar" style="background:var(--gold-soft); display:flex; align-items:center; justify-content:center; color:#a3760a; font-weight:800; font-size:12px;">RS</div><div class="row-label">Royal Statistical Society bursary<br><span style="color:var(--ink-soft); font-weight:500;">£1,500 · accredited courses (Manchester qualifies)</span></div><div class="due">Due 15 Oct</div></div>
-            </div>
-            <p style="font-size:11.5px; color:var(--ink-soft); padding:0 20px 18px;">Aggregated from public university and government sources — Atlas doesn't administer or take a cut of any of these.</p>
-          </div>
-
-          <div class="card reveal" style="margin-top:20px; margin-bottom:20px;">
-            <div class="panel-head"><h3>Ask an alumni</h3></div>
-            <p style="font-size:13px; color:var(--ink-soft); padding:0 20px 14px;">Matched with people who actually did your course, in your city — not a generic forum.</p>
-            <div class="list-card" id="alumniQa" style="margin:0 20px 16px;"></div>
-            <div style="display:flex; gap:10px; padding:0 20px 20px;">
-              <input class="field-input" id="alumniAsk" placeholder="Ask something only someone who's been there would know…" style="flex:1;">
-              <button type="button" class="btn btn-primary" id="alumniAskBtn">Ask</button>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -1514,12 +1449,12 @@
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
     document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = '1'; });
-    const home = document.getElementById('view-home');
-    if (home) home.classList.add('active');
+    const journey = document.getElementById('view-journey');
+    if (journey) journey.classList.add('active');
     const ring = document.getElementById('ringProgress');
     const label = document.getElementById('ringLabel');
-    if (ring) ring.setAttribute('stroke-dashoffset', '35');
-    if (label) label.textContent = '89%';
+    if (ring) ring.setAttribute('stroke-dashoffset', '88');
+    if (label) label.textContent = '72%';
     document.querySelectorAll('.stat-num[data-count]').forEach(el => {
       el.textContent = el.dataset.count + (el.dataset.suffix || '');
     });
@@ -1569,13 +1504,13 @@
     if (ring && !ring.dataset.animated){
       ring.dataset.animated = '1';
       if (REDUCE){
-        ring.setAttribute('stroke-dashoffset', 35);
-        if (label) label.textContent = '89%';
+        ring.setAttribute('stroke-dashoffset', 88);
+        if (label) label.textContent = '72%';
       } else {
-        gsap.fromTo(ring, { strokeDashoffset: 314 }, { strokeDashoffset: 35, duration: 1.3, delay: .25, ease: 'power2.inOut' });
+        gsap.fromTo(ring, { strokeDashoffset: 314 }, { strokeDashoffset: 88, duration: 1.3, delay: .25, ease: 'power2.inOut' });
         if (label){
           const obj = { v: 0 };
-          gsap.to(obj, { v: 89, duration: 1.3, delay: .25, ease: 'power2.inOut', onUpdate(){ label.textContent = Math.round(obj.v) + '%'; } });
+          gsap.to(obj, { v: 72, duration: 1.3, delay: .25, ease: 'power2.inOut', onUpdate(){ label.textContent = Math.round(obj.v) + '%'; } });
         }
       }
     }
@@ -1664,86 +1599,6 @@
     this.querySelector('.side-dot')?.remove();
   });
 
-  /* ---------- after-care 30/60/90 check-ins (atlas-portal-improvements.md §1) ----------
-     Real prompts per milestone, not just a link to the Community tab —
-     the report's #1-ranked finding is that after-care is where every
-     agent in the market fails. */
-  const AFTERCARE = {
-    30: [
-      { label: 'Confirm your part-time work hours are within your visa limit', done: true },
-      { label: 'Register with a GP near campus', done: true },
-      { label: 'Set a reminder for your next tuition instalment', done: false }
-    ],
-    60: [
-      { label: 'Check in on how the course workload actually feels', done: false },
-      { label: 'Get paired with an alumni mentor from your course', done: false },
-      { label: 'Review your budget against real living costs so far', done: false }
-    ],
-    90: [
-      { label: 'Confirm your visa/BRP details are all correct on file', done: false },
-      { label: 'Look at part-time or vacation work for next term', done: false },
-      { label: 'Tell us what worked and what didn\'t — it shapes the next cohort', done: false }
-    ]
-  };
-  const aftercareTabs = document.getElementById('aftercareTabs');
-  const aftercareList = document.getElementById('aftercareList');
-  function renderAftercare(day){
-    aftercareList.innerHTML = AFTERCARE[day].map(item => `
-      <div class="row">
-        <div class="mini-btn ${item.done ? 'done' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
-        <div class="row-label">${item.label}</div>
-      </div>
-    `).join('');
-  }
-  if (aftercareTabs) {
-    aftercareTabs.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if (!btn) return;
-      aftercareTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderAftercare(btn.dataset.day);
-    });
-    aftercareList.addEventListener('click', (e) => {
-      const toggle = e.target.closest('.mini-btn');
-      if (!toggle) return;
-      toggle.classList.toggle('done');
-    });
-    renderAftercare(30);
-  }
-
-  /* ---------- alumni/peer Q&A (atlas-portal-improvements.md §3) ----------
-     Matched to the student's own course + destination city, not a
-     generic forum — the seed Qs below are already scoped that way. */
-  const ALUMNI_QA = [
-    { name: 'Rohan V.', tag: 'MSc Data Science, Manchester · graduated 2025', q: 'Is the RSS accreditation actually worth mentioning in job applications?', a: "Yes — two recruiters specifically asked about it in interviews. It's a real signal to UK employers, not just a line on the syllabus." },
-    { name: 'Ishita P.', tag: 'MSc Data Science, Manchester · current student', q: "How tight is the housing market near campus in September?", a: 'Tight but manageable if you start looking in July. SpareRoom and the uni-approved list both moved fast for me — book viewings before you land if you can.' }
-  ];
-  const alumniQaEl = document.getElementById('alumniQa');
-  function renderAlumniQa(){
-    alumniQaEl.innerHTML = ALUMNI_QA.map(item => `
-      <div class="row" style="align-items:flex-start; cursor:default;">
-        <div class="p-avatar" style="flex:none;"><img src="https://i.pravatar.cc/100?img=${item.img || 25}" alt="${item.name}"></div>
-        <div style="flex:1; min-width:0;">
-          <div class="row-label" style="white-space:normal;"><b>${item.name}</b> <span style="color:var(--ink-soft); font-weight:500; font-size:12px;">· ${item.tag}</span></div>
-          <div style="font-size:13.5px; font-weight:600; margin-top:4px;">${item.q}</div>
-          <div style="font-size:13px; color:var(--ink-soft); margin-top:4px; line-height:1.5;">${item.a || '<i>Waiting on a matched alumni to answer — usually within a day or two.</i>'}</div>
-        </div>
-      </div>
-    `).join('');
-  }
-  renderAlumniQa();
-  document.getElementById('alumniAskBtn')?.addEventListener('click', () => {
-    const input = document.getElementById('alumniAsk');
-    const text = input.value.trim();
-    if (!text) return;
-    ALUMNI_QA.unshift({ name: 'You', tag: 'MSc Data Science, Manchester · your question', q: text, a: null, img: 47 });
-    input.value = '';
-    renderAlumniQa();
-  });
-  document.getElementById('alumniAsk')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('alumniAskBtn').click();
-  });
-
   /* ---------- community search ---------- */
   const commSearch = document.getElementById('commSearch');
   const commEmpty = document.getElementById('commEmpty');
@@ -1814,7 +1669,7 @@
   });
 
 
-  if (!REDUCE && !skipGSAP && !window.matchMedia('(hover: none)').matches){
+  if (!REDUCE && !skipGSAP){
     document.querySelectorAll('.tilt').forEach(el => {
       gsap.set(el, { transformPerspective: 700 });
       const rotX = gsap.quickTo(el, 'rotationX', { duration: .5, ease: 'power3' });
@@ -1924,14 +1779,14 @@
   /* ---------- boot sequence ---------- */
   function boot(){
     const loader = document.getElementById('loader');
-    const home = document.getElementById('view-home');
+    const journey = document.getElementById('view-journey');
 
     if (skipGSAP){ initFallback(); return; }
 
     if (REDUCE){
       if (loader) loader.style.display = 'none';
-      revealView(home);
-      runHomeExtras(home);
+      revealView(journey);
+      runHomeExtras(document.getElementById('view-home'));
       setupScrollReveals();
       return;
     }
@@ -1949,405 +1804,13 @@
       .to('#loader', { opacity: 0, duration: .45, ease: 'power2.inOut', onComplete(){ loader.style.display = 'none'; } })
       .to(['.brand', '.pillnav', '.top-right'], { opacity: 1, y: 0, duration: .5, ease: 'power3.out', stagger: .06 }, '-=.15')
       .to('#sidebarRail .side-btn', { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)', stagger: .05 }, '-=.4')
-      .add(() => { revealView(home); runHomeExtras(home); }, '-=.25');
+      .add(() => { revealView(journey); }, '-=.25');
   }
 
   if (document.readyState === 'loading'){
     window.addEventListener('DOMContentLoaded', boot);
   } else {
     boot();
-  }
-})();
-</script>
-
-<!-- ============================================================
-     Flow wiring — additive only. Every element below is new; nothing
-     above this comment was touched, and the drawers reuse the same
-     .drawer component already shipped for notifications.html so the
-     interaction (right-side slide-over, 40% backdrop, Esc/backdrop
-     to close) matches everywhere it appears.
-     ============================================================ -->
-<div class="drawer-backdrop" id="drawerBackdrop"></div>
-
-<aside class="drawer" id="notifDrawer" aria-label="Notifications">
-  <div class="drawer-head">
-    <h3>Notifications</h3>
-    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close notifications">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </div>
-  </div>
-  <div class="drawer-body" id="notifList"></div>
-</aside>
-
-<aside class="drawer" id="taskDrawer" aria-label="Task detail">
-  <div class="drawer-head">
-    <h3>Task</h3>
-    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close task">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </div>
-  </div>
-  <div class="drawer-body" style="padding:18px 22px;">
-    <div class="field" style="margin-bottom:16px;">
-      <label class="field-label">Task</label>
-      <div id="taskTitle" style="font-size:15px; font-weight:700; margin-top:4px;"></div>
-    </div>
-    <div class="field" style="margin-bottom:18px;">
-      <label class="field-label">Due</label>
-      <div id="taskDue" style="font-size:13.5px; color:var(--ink-soft); margin-top:4px;"></div>
-    </div>
-    <div class="field">
-      <label class="field-label" for="taskNote">Note for your advisor</label>
-      <textarea class="field-input" id="taskNote" rows="5" style="resize:vertical;" placeholder="Add context, a question, or a link…"></textarea>
-    </div>
-  </div>
-  <div class="drawer-foot">
-    <button class="btn btn-primary" id="taskMarkDone">Mark complete</button>
-    <button class="btn btn-secondary" data-close-drawer>Close</button>
-  </div>
-</aside>
-
-<aside class="drawer" id="helpDrawer" aria-label="Help and support">
-  <div class="drawer-head">
-    <h3>Help &amp; support</h3>
-    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close help">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </div>
-  </div>
-  <div class="drawer-body" style="padding:6px 22px 20px;">
-    <div class="sec-head" style="margin-top:14px;"><h2 style="font-size:13px;">Frequently asked</h2></div>
-    <div class="field-help" style="margin-bottom:16px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">How fast do advisors reply?</b>Usually within one business day — faster during application deadlines.</div>
-    <div class="field-help" style="margin-bottom:16px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">Is Atlas really free?</b>Yes — always, for students. Service partners pay a flat, published fee, never a commission on your choices.</div>
-    <div class="field-help" style="margin-bottom:20px;"><b style="display:block; color:var(--ink); font-size:13.5px; margin-bottom:4px;">Can I change my shortlist later?</b>Yes, from Journey — add or remove universities at any stage before you apply.</div>
-  </div>
-  <div class="drawer-foot">
-    <button class="btn btn-primary btn-block" onclick="location.href='messaging.html'">Message an advisor</button>
-  </div>
-</aside>
-
-<aside class="drawer" id="searchDrawer" aria-label="Search Atlas">
-  <div class="drawer-head">
-    <h3>Search</h3>
-    <div class="drawer-close" data-close-drawer role="button" tabindex="0" aria-label="Close search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </div>
-  </div>
-  <div style="padding:14px 22px 0;">
-    <input class="field-input" id="globalSearch" placeholder="Search universities, services, community…" autocomplete="off">
-  </div>
-  <div class="drawer-body" id="searchResults"></div>
-</aside>
-
-<script src="shared/atlas-shared.js"></script>
-<script>
-(function(){
-  /* ---------- shared drawer open/close ---------- */
-  const backdrop = document.getElementById('drawerBackdrop');
-  let openDrawerEl = null;
-  function showDrawer(el){
-    if (openDrawerEl) AtlasUI.closeDrawer(openDrawerEl, backdrop);
-    openDrawerEl = el;
-    AtlasUI.openDrawer(el, backdrop);
-  }
-  function hideDrawer(){
-    if (openDrawerEl) AtlasUI.closeDrawer(openDrawerEl, backdrop);
-    openDrawerEl = null;
-  }
-  backdrop.addEventListener('click', hideDrawer);
-  document.querySelectorAll('[data-close-drawer]').forEach(el => el.addEventListener('click', hideDrawer));
-
-  /* ---------- notification bell -> drawer (not a page navigation) ---------- */
-  const NOTIFS = [
-    { icon: 'coral', unread: true, time: '2h ago', title: 'Visa biometrics appointment', body: '6 days left — book your slot at the Manchester visa centre.', svg: '<path d="M12 8v5M12 16v.1"/><circle cx="12" cy="12" r="9"/>' },
-    { icon: 'blue', unread: true, time: '5h ago', title: 'New message from Priya S.', body: 'Your SOP looks ready — go ahead and submit whenever you’re set.', svg: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>' },
-    { icon: 'green', unread: true, time: '1d ago', title: 'Offer accepted — University of Manchester', body: 'Your deposit has been confirmed. Next: the visa stage.', svg: '<path d="M20 6L9 17l-5-5"/>' },
-    { icon: 'gold', unread: false, time: '2d ago', title: 'New event: Pre-departure briefing', body: '3 Sept · Online — hosted by students already in Manchester.', svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
-    { icon: 'coral', unread: false, time: '3d ago', title: 'Financial evidence check due', body: 'Due 4 September — upload your forex transfer receipt.', svg: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>' }
-  ];
-  function renderNotifs(){
-    document.getElementById('notifList').innerHTML = NOTIFS.map(n => `
-      <div class="notif-row ${n.unread ? 'unread' : ''}">
-        <div class="notif-icon ${n.icon}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${n.svg}</svg></div>
-        <div class="notif-text"><b>${n.title}</b><span>${n.body}</span></div>
-        <span class="notif-time">${n.time}</span>
-      </div>
-    `).join('');
-  }
-  renderNotifs();
-  const bell = document.querySelector('.top-right .icon-btn');
-  if (bell){
-    bell.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showDrawer(document.getElementById('notifDrawer'));
-    });
-  }
-
-  /* ---------- profile avatar -> profile page (desktop) or account menu
-     (mobile) — wired further down, once, near the account-menu markup ---------- */
-
-  /* ---------- sidebar tool icons ---------- */
-  const railIcons = document.querySelectorAll('#sidebarRail .side-btn');
-  // order in the markup: Search, Messages, Document checklist, Help & support, (gap), Settings, theme toggle
-  if (railIcons[0]) railIcons[0].addEventListener('click', (e) => { e.stopPropagation(); showDrawer(document.getElementById('searchDrawer')); document.getElementById('globalSearch').focus(); });
-  if (railIcons[1]) railIcons[1].addEventListener('click', () => location.href = 'messaging.html');
-  if (railIcons[2]) railIcons[2].addEventListener('click', () => location.href = 'checklist.html');
-  if (railIcons[3]) railIcons[3].addEventListener('click', (e) => { e.stopPropagation(); showDrawer(document.getElementById('helpDrawer')); });
-  if (railIcons[4]) railIcons[4].addEventListener('click', () => location.href = 'profile.html'); // Settings
-
-  /* ---------- global search across the catalogue, services, community ---------- */
-  const SEARCH_INDEX = [
-    { label: 'University of Manchester', sub: 'University · MSc Data Science', href: 'university-detail.html?u=manchester' },
-    { label: 'UCL', sub: 'University · MSc Data Science', href: 'university-detail.html?u=ucl' },
-    { label: 'University of Leeds', sub: 'University · MSc Data Science', href: 'university-detail.html?u=leeds' },
-    { label: 'University of Warwick', sub: 'University · MSc Data Science', href: 'university-detail.html?u=warwick' },
-    { label: 'University of Birmingham', sub: 'University · MSc Data Science', href: 'university-detail.html?u=birmingham' },
-    { label: 'University of Edinburgh', sub: 'University · MSc Data Science', href: 'university-detail.html?u=edinburgh' },
-    { label: 'UK bank account', sub: 'Service · 4 partners', href: 'service-detail.html?cat=bank' },
-    { label: 'SIM & mobile plan', sub: 'Service · 3 partners', href: 'service-detail.html?cat=sim' },
-    { label: 'Housing', sub: 'Service · 6 partners', href: 'service-detail.html?cat=housing' },
-    { label: 'Foreign exchange', sub: 'Service · 3 partners', href: 'service-detail.html?cat=forex' },
-    { label: 'Insurance', sub: 'Service · 2 partners', href: 'service-detail.html?cat=insurance' },
-    { label: 'Student loans', sub: 'Service · 5 partners', href: 'service-detail.html?cat=loans' },
-    { label: 'Library assistant, University of Manchester', sub: 'Job', href: 'community-detail.html?type=job&id=lib' },
-    { label: 'Pre-departure briefing: what to pack', sub: 'Event · 3 Sept', href: 'community-detail.html?type=event&id=briefing' },
-    { label: 'Registering with a GP in your first week', sub: 'Guide', href: 'community-detail.html?type=guide&id=gp' },
-    { label: 'Council tax exemption for students', sub: 'Guide', href: 'community-detail.html?type=guide&id=counciltax' }
-  ];
-  const searchInput = document.getElementById('globalSearch');
-  const searchResults = document.getElementById('searchResults');
-  function renderSearch(){
-    const q = searchInput.value.trim().toLowerCase();
-    const rows = q ? SEARCH_INDEX.filter(r => r.label.toLowerCase().includes(q)) : SEARCH_INDEX.slice(0, 6);
-    searchResults.innerHTML = rows.map(r => `<div class="row" data-href="${r.href}" role="button" tabindex="0" style="cursor:pointer; padding:12px 22px;"><div class="row-label">${r.label}<br><span style="color:var(--ink-soft); font-weight:500; font-size:12px;">${r.sub}</span></div></div>`).join('')
-      || '<div class="empty on"><b>No matches</b>Try a different search term.</div>';
-  }
-  renderSearch();
-  searchInput.addEventListener('input', renderSearch);
-  searchResults.addEventListener('click', (e) => { const row = e.target.closest('[data-href]'); if (row) location.href = row.dataset.href; });
-
-  /* ---------- Home: shortlist cards -> university detail ---------- */
-  const SHORTLIST_SLUGS = ['manchester', 'ucl', 'leeds'];
-  document.querySelectorAll('#view-home .shortlist-grid .shortlist-card').forEach((card, i) => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => location.href = `university-detail.html?u=${SHORTLIST_SLUGS[i] || 'manchester'}`);
-  });
-
-  /* ---------- Home: "View full journey" -> switch to the Journey tab ---------- */
-  document.getElementById('viewFullJourneyLink')?.addEventListener('click', () => {
-    document.querySelector('#pillnav [data-view="journey"]')?.click();
-  });
-
-  /* ---------- Home: advisor rows -> messaging, correct thread ---------- */
-  const advisorRows = document.querySelectorAll('#view-home .home-side .card:nth-of-type(2) .row');
-  const ADVISOR_THREADS = ['priya', 'james'];
-  advisorRows.forEach((row, i) => {
-    row.style.cursor = 'pointer';
-    row.addEventListener('click', (e) => {
-      if (e.target.closest('.mini-btn')) return; // let the existing tick/ripple behavior keep working
-      location.href = `messaging.html?thread=${ADVISOR_THREADS[i] || 'priya'}`;
-    });
-  });
-
-  /* ---------- Home + Journey: focus-cta buttons ---------- */
-  document.querySelectorAll('.focus-cta').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const label = btn.textContent.trim();
-      if (label === 'Open the visa checklist' || label === 'Book appointment') location.href = 'checklist.html';
-    });
-  });
-
-  /* ---------- Services: svc-card "Explore" -> service detail ---------- */
-  document.querySelectorAll('#view-services .svc-card').forEach(card => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.chip')) return;
-      const cat = card.dataset.cat;
-      if (cat) location.href = `service-detail.html?cat=${cat}`;
-    });
-  });
-
-  /* ---------- Journey: "after the visa" tiles -> matching service category ---------- */
-  const NEXT_GRID_CATS = ['housing', 'bank', 'sim', 'insurance'];
-  document.querySelectorAll('#view-journey .next-grid .card').forEach((tile, i) => {
-    tile.style.cursor = 'pointer';
-    tile.addEventListener('click', () => location.href = `service-detail.html?cat=${NEXT_GRID_CATS[i] || 'housing'}`);
-  });
-
-  /* ---------- Journey: board toolbar (add task / calendar) ---------- */
-  const boardIcons = document.querySelectorAll('#view-journey .board-toolbar .icon-btn');
-  if (boardIcons[0]) boardIcons[0].addEventListener('click', (e) => { e.stopPropagation(); openTaskDrawer('New task', 'No due date yet'); });
-  if (boardIcons[1]) boardIcons[1].addEventListener('click', () => location.href = 'calendar.html');
-
-  /* ---------- Journey: task/row items -> task-detail drawer ---------- */
-  function openTaskDrawer(title, due){
-    document.getElementById('taskTitle').textContent = title;
-    document.getElementById('taskDue').textContent = due;
-    document.getElementById('taskNote').value = '';
-    showDrawer(document.getElementById('taskDrawer'));
-  }
-  document.querySelectorAll('#view-journey .task, #view-journey .row').forEach(item => {
-    if (item.closest('.next-grid')) return; // handled above as service links
-    item.style.cursor = 'pointer';
-    item.addEventListener('click', (e) => {
-      if (e.target.closest('.mini-btn, .plus')) return; // keep existing tick/add behavior working; .more now opens the drawer too — that's what "more options" means here
-      const label = item.querySelector('.task-label, .row-label')?.textContent.trim() || 'Task';
-      const due = item.querySelector('.due')?.textContent.trim() || 'No due date';
-      openTaskDrawer(label, due);
-    });
-  });
-  document.getElementById('taskMarkDone').addEventListener('click', hideDrawer);
-
-  /* ---------- Journey/Community: "Add guide" / "Add milestone" -> reuse the
-     task drawer as a lightweight add-item form (spec §2: lightweight actions
-     are drawers). "Export guides" has no meaningful client-side action
-     without a backend, so it's left as-is rather than faked. ---------- */
-  document.querySelector('[title="Add guide"]')?.addEventListener('click', () => openTaskDrawer('New guide', 'No date set'));
-  document.querySelector('[title="Add milestone"]')?.addEventListener('click', () => openTaskDrawer('New milestone', 'No date set'));
-  document.querySelector('[title="Add task"]')?.addEventListener('click', () => openTaskDrawer('New task', 'No date set'));
-  document.querySelector('[title="Open calendar"]')?.addEventListener('click', () => location.href = 'calendar.html');
-
-  /* ---------- Journey: "suggested guides" table rows have no matching built
-     guide content today (their titles don't match any community-detail.html
-     record) — left unwired rather than linked to a mismatched article. ---------- */
-
-  /* ---------- Home: "Next up" task list -> task-detail drawer ---------- */
-  document.querySelectorAll('#view-home .tasklist .row').forEach(item => {
-    item.style.cursor = 'pointer';
-    item.addEventListener('click', (e) => {
-      if (e.target.closest('.mini-btn, .plus')) return;
-      const label = item.querySelector('.task-label, .row-label')?.textContent.trim() || 'Task';
-      const due = item.querySelector('.due')?.textContent.trim() || 'No due date';
-      openTaskDrawer(label, due);
-    });
-  });
-
-  /* ---------- Home: profile ring -> profile page ---------- */
-  const ringCard = document.querySelector('#view-home .ring-card');
-  if (ringCard) {
-    ringCard.style.cursor = 'pointer';
-    ringCard.addEventListener('click', () => location.href = 'profile.html');
-  }
-
-  /* ---------- Community: cards -> community detail ---------- */
-  const COMM_MAP = {
-    'Library assistant, University of Manchester': ['job', 'lib'],
-    'Content intern, student-run publication': ['job', 'intern'],
-    'Junior analyst, fintech scale-up': ['job', 'analyst'],
-    'Pre-departure briefing: what to pack': ['event', 'briefing'],
-    'New arrivals meetup': ['event', 'meetup'],
-    "Opening your bank account, live Q&A": ['event', 'bankqa'],
-    'Registering with a GP in your first week': ['guide', 'gp'],
-    'Council tax exemption for students': ['guide', 'counciltax'],
-    'Building UK credit history from zero': ['guide', 'credit']
-  };
-  document.querySelectorAll('#view-community .comm-card').forEach(card => {
-    const title = card.querySelector('h5')?.textContent.trim();
-    const match = title && COMM_MAP[title];
-    if (!match) return;
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => location.href = `community-detail.html?type=${match[0]}&id=${match[1]}`);
-  });
-
-  /* ---------- Community: "View all" -> community-list.html ---------- */
-  document.querySelectorAll('#view-community .comm-view-all[data-type]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      location.href = `community-list.html?type=${el.dataset.type}`;
-    });
-  });
-
-  /* ---------- mobile: account menu (sidebar collapse target, spec §4) ---------- */
-  const accountMenu = document.getElementById('accountMenu');
-  const profileBtn = document.querySelector('.profile-btn');
-  const isMobile = () => window.matchMedia('(max-width:620px)').matches;
-
-  function closeAccountMenu(){ accountMenu.classList.remove('on'); }
-  function toggleAccountMenu(){ accountMenu.classList.toggle('on'); }
-
-  if (profileBtn){
-    profileBtn.addEventListener('click', (e) => {
-      if (isMobile()){
-        e.stopPropagation();
-        toggleAccountMenu();
-      } else {
-        location.href = 'profile.html';
-      }
-    });
-  }
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#accountMenu, .profile-btn')) closeAccountMenu();
-  });
-  accountMenu?.addEventListener('click', (e) => {
-    const item = e.target.closest('.account-menu-item');
-    if (!item) return;
-    if (item.dataset.href) { location.href = item.dataset.href; return; }
-    if (item.dataset.action === 'search') { closeAccountMenu(); showDrawer(document.getElementById('searchDrawer')); document.getElementById('globalSearch').focus(); return; }
-    if (item.dataset.action === 'help') { closeAccountMenu(); showDrawer(document.getElementById('helpDrawer')); return; }
-    if (item.dataset.action === 'theme') { closeAccountMenu(); document.getElementById('themeToggle')?.click(); return; }
-    if (item.dataset.action === 'logout') { closeAccountMenu(); logout(); return; }
-  });
-
-  /* real logout — clears the session flag only (atlas-onboarded is a
-     profile fact, not a session fact, so it survives — see
-     shared/atlas-auth-gate.js). Shared by the account menu and the
-     sidebar's Settings icon. */
-  function logout(){
-    try { localStorage.removeItem('atlas-session'); } catch (e) {}
-    location.href = 'auth.html';
-  }
-
-  /* ---------- mobile: Journey board sub-tabs + swipe (spec §4) ---------- */
-  const jSubtabs = document.getElementById('jSubtabs');
-  const jBoard = document.getElementById('jBoard');
-  const jCols = jBoard ? [...jBoard.querySelectorAll(':scope > .j-col')] : [];
-  function setActiveCol(i){
-    jCols.forEach((c, idx) => c.classList.toggle('active-col', idx === i));
-    jSubtabs?.querySelectorAll('button').forEach((b, idx) => b.classList.toggle('active', idx === i));
-  }
-  setActiveCol(0);
-  jSubtabs?.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    setActiveCol([...jSubtabs.children].indexOf(btn));
-  });
-  if (jBoard){
-    let touchStartX = null;
-    jBoard.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-    jBoard.addEventListener('touchend', (e) => {
-      if (touchStartX === null) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const current = jCols.findIndex(c => c.classList.contains('active-col'));
-      if (Math.abs(dx) > 40){
-        if (dx < 0 && current < jCols.length - 1) setActiveCol(current + 1);
-        else if (dx > 0 && current > 0) setActiveCol(current - 1);
-      }
-      touchStartX = null;
-    }, { passive: true });
-  }
-
-  /* ---------- brand-new-user Home state (spec §5) — demo via ?newuser=1,
-     the default page is untouched either way ---------- */
-  if (new URLSearchParams(location.search).get('newuser')){
-    const emptyState = document.getElementById('homeEmptyState');
-    if (emptyState){
-      [...document.querySelectorAll('#view-home > *')].forEach(el => {
-        if (el.id !== 'homeEmptyState') el.style.display = 'none';
-      });
-      emptyState.style.display = '';
-      AtlasUI.revealNow(emptyState.querySelectorAll('.reveal'));
-    }
-  }
-
-  /* ---------- Search / Help & support, reached from another page ----------
-     Every secondary page's sidebar Search/Help icons navigate here with
-     ?search=1 / ?help=1 rather than duplicating the full search index (see
-     SEARCH_INDEX above) or the FAQ content on every single page — same
-     pattern as ?newuser=1 above. */
-  const entryParams = new URLSearchParams(location.search);
-  if (entryParams.get('search')){
-    showDrawer(document.getElementById('searchDrawer'));
-    document.getElementById('globalSearch')?.focus();
-  } else if (entryParams.get('help')){
-    showDrawer(document.getElementById('helpDrawer'));
   }
 })();
 </script>

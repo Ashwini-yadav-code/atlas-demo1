@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <script src="shared/atlas-auth-gate.js"></script>
@@ -40,10 +40,17 @@
   .cal-list-date span{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; }
   @media (max-width:700px){ .cal-cell{ min-height:60px; } .cal-item-dot{ font-size:0; padding:0; width:6px; height:6px; border-radius:50%; } }
 </style>
+<link rel="stylesheet" href="shared/atlas-glass-video.css">
 </head>
 <body>
 
   <div class="spotlight" id="spotlight"><div class="spotlight-glow" id="spotlightGlow"></div></div>
+
+  <div class="home-media" aria-hidden="true">
+    <video src="assets/home-bg.mp4" autoplay muted loop playsinline preload="auto"></video>
+    <div class="hm-scrim"></div>
+    <div class="hm-grain"></div>
+  </div>
 
   <div class="screen">
     <div class="app">

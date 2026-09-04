@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Atlas — video backdrop + glass skin (ported from atlas-portal-v2-ember.html,
+   the "Ember & Graphite" v2 design reference the user supplied).
+   Load AFTER atlas-design-system.css and atlas-extended.css so these rules
+   win. Applies everywhere .home-media is present in the markup: the whole
+   app surface goes transparent, a looping video sits fixed behind
+   everything, and every card/pillnav/chip/icon-btn becomes frosted glass
+   over it — one visual system, not a light/dark surface choice layered on
+   top of it (the [data-theme] toggle still governs accent/status colors,
+   just not the base surface treatment anymore).
+   ========================================================================== */
+
+html, body{ background:#0c0b0a; }
+.screen, .app, .main, .view{ background:transparent; }
+
+.home-media{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.home-media video{
+  position:absolute; top:50%; left:50%; min-width:100%; min-height:100%;
+  width:auto; height:auto; transform:translate(-50%,-50%) scale(1.04); object-fit:cover;
+}
+.home-media .hm-scrim{
+  position:absolute; inset:0;
+  background:
+    linear-gradient(115deg,rgba(8,7,6,.84) 0%,rgba(10,8,7,.66) 42%,rgba(8,7,6,.58) 100%),
+    radial-gradient(120% 90% at 70% 6%,rgba(8,7,6,0) 26%,rgba(8,7,6,.6) 100%);
+}
+.home-media .hm-grain{
+  position:absolute; inset:0; opacity:.14; mix-blend-mode:overlay;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22/></filter><rect width=%22160%22 height=%22160%22 filter=%22url(%23n)%22/></svg>');
+}
+/* the old grain/spotlight-glow cursor effect fights visually with the video
+   — the reference design disables it wherever the video backdrop is on */
+.spotlight{ display:none; }
+
+@media (prefers-reduced-motion:reduce){ .home-media video{ display:none; } }
+
+/* ---------- glass surfaces: light ink + translucency across the shell ---------- */
+.app{
+  --ink:#ffffff;
+  --ink-soft:rgba(255,255,255,.8);
+  --ink-faint:rgba(255,255,255,.62);
+  --line:rgba(255,255,255,.18);
+  --line-strong:rgba(255,255,255,.3);
+  --tint:rgba(255,255,255,.07);
+  --tint-line:rgba(255,255,255,.16);
+  --panel:rgba(255,255,255,.1);
+  --card:rgba(255,255,255,.12);
+  color:#ffffff;
+}
+
+.glass-surface,
+.app .card,
+.app .pillnav,
+.app .icon-btn,
+.app .searchbar,
+.app .url-bar,
+.app .chip,
+.app .svc-card,
+.app .comm-card,
+.app .cat-card,
+.app .stack .task,
+.app .guide-card,
+.app .msg-list,
+.app .msg-thread{
+  background:linear-gradient(155deg,rgba(255,255,255,.17),rgba(255,255,255,.06));
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.26);
+  color:#ffffff;
+}
+.app .icon-btn, .app .pillnav, .app .chip, .app .searchbar, .app .url-bar{
+  box-shadow:0 12px 26px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.24);
+}
+.app .sidebar{
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  border-color:rgba(255,255,255,.18);
+}
+.app .side-btn{ color:rgba(255,255,255,.78); }
+.app .side-btn:hover{ background:rgba(255,255,255,.14); color:#fff; }
+.app .side-btn.active{ background:#ffffff; color:#14151a; }
+.app .pillnav button{ color:rgba(255,255,255,.78); }
+.app .pillnav button.active{ background:#ffffff; color:#14151a; }
+.app .chip.active, .app .chip[aria-pressed="true"]{ background:#ffffff; color:#14151a; border-color:#ffffff; }
+.app input, .app .searchbar input, .app .url-bar input, .app .field-input, .app textarea{ color:#fff; background:transparent; }
+.app input::placeholder, .app textarea::placeholder{ color:rgba(255,255,255,.62); }
+.app .field-input{ border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.08) !important; }
+.app .field-input:focus{ border-color:rgba(255,255,255,.55); }
+
+/* nested surfaces stay quieter than their card */
+.app .list-card{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); box-shadow:none; }
+.app .row:hover{ background:rgba(255,255,255,.12); }
+.app .mini-btn{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.24); color:#fff; }
+.app .mini-btn:hover{ background:rgba(255,255,255,.22); }
+.app .plus{ border-color:rgba(255,255,255,.34); color:#fff; }
+.app .shortlist-card, .app .next-grid .card, .app .partner-row, .app .cal-cell, .app .aftercare-card{
+  background:linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-color:rgba(255,255,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  color:#fff;
+}
+.app th{ color:rgba(255,255,255,.68); border-bottom-color:rgba(255,255,255,.16); }
+.app td{ border-bottom-color:rgba(255,255,255,.12); }
+.app .step-dot{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.7); }
+.app .step.done .step-dot{ background:#ffffff; border-color:#ffffff; color:#14151a; }
+.app .step.now .step-dot{ background:rgba(12,10,9,.6); border-color:#8f9dff; color:#c3caff; }
+.app .step-line{ background:rgba(255,255,255,.24); }
+.app .step.done .step-line, .app .step.now .step-line{ background:#ffffff; }
+
+/* pills and accents re-tuned for a dark, translucent surface */
+.app .due{ color:rgba(255,255,255,.8); }
+.app .due.soon{ color:#ffd9bd; background:rgba(241,96,1,.26); }
+.app .status-pill.live{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+.app .status-pill.draft{ background:rgba(241,96,1,.24); color:#ffd9bd; }
+.app .match-high{ background:rgba(46,160,97,.26); color:#a8f0c6; }
+.app .match-mid{ background:rgba(241,96,1,.26); color:#ffd9bd; }
+.app .svc-why, .app .svc-link{ color:#ffbe8f; }
+.app .svc-card.priority{ border-color:rgba(241,96,1,.45); background:linear-gradient(155deg,rgba(241,96,1,.2),rgba(255,255,255,.05)); }
+.app .trust-ribbon{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(255,255,255,.86); }
+.app .trust-tag, .app .svc-earn{ color:#a8f0c6; }
+.app .svc-earn{ border-top-color:rgba(255,255,255,.16); }
+.app .j-head h1, .app .j-head p{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
+.app .panel-note, .app .sec-head span, .app .stat-lbl{ color:rgba(255,255,255,.74); }
+.app .fin-table .fin-best{ background:rgba(46,160,97,.18); }
+.app .fin-table th, .app .fin-table td{ border-color:rgba(255,255,255,.14); }
+.app .aftercare-tabs button{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); color:rgba(255,255,255,.8); }
+.app .aftercare-tabs button.active{ background:#ffffff; color:#14151a; border-color:#ffffff; }
+.app .aftercare-contact{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); }
+
+/* the branded accent-dark / ember cards keep their gradient, just with
+   darker glass around them instead of a flat fill */
+.app .card.accent-dark{
+  background:linear-gradient(155deg,rgba(12,10,9,.64),rgba(12,10,9,.42));
+  backdrop-filter:blur(26px) saturate(140%);
+  -webkit-backdrop-filter:blur(26px) saturate(140%);
+  border-color:rgba(255,255,255,.16);
+}
+.app .card.accent-dark th{ color:rgba(255,255,255,.66); border-bottom-color:rgba(255,255,255,.16); }
+.app .card.accent-dark td{ border-bottom-color:rgba(255,255,255,.12); }
+.app .focus-card{
+  background:linear-gradient(120deg,#000000 0%, #c10801 44%, #f16001 84%, #d9c3ab 100%);
+  border-color:#c10801; color:#ffffff;
+}
+.app .focus-cta{ background:#ffffff; color:#c10801; }
+.app .focus-cta:hover{ box-shadow:0 8px 18px -8px rgba(0,0,0,.55); }
+
+/* drawers/modals sit above the video too */
+.app .drawer{
+  background:linear-gradient(155deg,rgba(20,18,16,.86),rgba(12,10,9,.92));
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  border-left:1px solid rgba(255,255,255,.14);
+}
+.app .drawer-head{ border-bottom-color:rgba(255,255,255,.14); }
+
+@media (max-width:860px){
+  .app .bottom-nav, .app nav.sidebar{
+    background:linear-gradient(180deg,rgba(12,10,9,.72),rgba(12,10,9,.86));
+    backdrop-filter:blur(26px) saturate(140%);
+    -webkit-backdrop-filter:blur(26px) saturate(140%);
+    border-color:rgba(255,255,255,.18);
+  }
+}
